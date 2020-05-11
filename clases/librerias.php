@@ -58,7 +58,7 @@
       
     }
 
-    public function jqueryValidate($element = "form-group"){
+    public function jqueryValidate($validar = 1, $element = "form-group"){
       $this->cadena_libreria = '
   <script type="text/javascript" src="'. $this->ruta_libreria .'jquery-validate/jquery.validate.min.js"></script>
   <script type="text/javascript" src="'. $this->ruta_libreria .'jquery-validate/localization/messages_es.min.js"></script>
@@ -79,8 +79,11 @@
           $(element).removeClass("is-invalid");
           $(element).addClass("is-valid");
         }
-      });
-      $("form").validate();
+      });';
+  if ($validar == 1) {
+    $this->cadena_libreria .= '$("form").validate();';
+  }
+  $this->cadena_libreria .= '
     });
   </script>';
       return($this->cadena_libreria); 

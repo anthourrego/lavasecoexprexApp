@@ -13,6 +13,11 @@
 
   require_once($ruta_raiz . 'clases/define.php');
 
+  //Encripta el password en el formato deseado
+  function encriptarPass($pass){
+    return password_hash($pass, PASSWORD_DEFAULT, ['cost' => 15]);
+  }
+
   function textoblanco($texto){
     $conv= array(" " => "");
     //Guardamos el resultado en una variable

@@ -25,7 +25,7 @@
     echo $lib->metaTagsRequired();
     echo $lib->iconoPag();
   ?>  
-  <title>Dashboard  | LavaSecoExprex</title>
+  <title id="tituloPagina">Dashboard | LavaSecoExprex</title>
 
   <?php  
     echo $lib->jquery();
@@ -34,6 +34,7 @@
     echo $lib->fontAwesome();
     echo $lib->alertify();
     echo $lib->proyecto();
+    echo $lib->sweetAlert2();
     echo $lib->overlayScrollbars();
     
   ?>
@@ -86,10 +87,18 @@
           <!-- Add icons to the links using the .nav-icon class
             with font-awesome or any other icon font library -->
           <li class="nav-item">
-            <a href="pages/calendar.html" class="nav-link">
+            <a href="<?php $ruta_raiz ?>modulos/usuarios/" data-modulo="Usuarios" target="object-contenido" class="nav-link link moduloUsuarios">
               <i class="nav-icon fas fa-users"></i>
               <p>
                 Usuarios
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="<?php $ruta_raiz ?>modulos/modulos/" data-modulo="Modulos" target="object-contenido" class="nav-link link moduloModulos">
+              <i class="nav-icon fas fa-lock"></i>
+              <p>
+                Módulos
               </p>
             </a>
           </li>
@@ -107,12 +116,12 @@
       <object type="text/html" id="object-contenido" name="object-contenido" data="" class="w-100 vh-100 border-0"></object>
     </div>
     <!-- /.content-wrapper -->
-    <footer class="main-footer">
+    <!-- <footer class="main-footer">
       <div class="float-right d-none d-sm-block">
         <b>Version</b> 1.0
       </div>
       <strong>Copyright &copy; 2020.</strong> Todos los derechos reservados.
-    </footer>
+    </footer> -->
   </div>
   <!-- ./wrapper -->
 
@@ -127,7 +136,7 @@
           </div>
         </div>
         <div>
-          <img class="w-50" src="<?php echo($ruta_raiz); ?>assets/img/logo.png" alt="">
+          <img class="w-50" src="<?php echo($ruta_raiz); ?>assets/img/logo.svg" alt="">
         </div>
       </div>
     </div>
@@ -156,10 +165,18 @@
     //Tiempo en que valida la session
     window.idleInterval = setInterval(validarSession, 600000); // 10 minute 
 
-    $(".nav-item").on("click", function(){
-      $(".nav-item").removeClass("active");
+    $(".link").on("click", function(){
+      $(".link").removeClass("active");
       $(this).addClass("active");
+      localStorage.moduloActual<?php echo(PROYECTO) ?> = $(this).data('modulo');
+      $('#tituloPagina').html($(this).data('modulo') + ' | LavaSecoExprex');
     });
+
+    if (localStorage.moduloActual<?php echo(PROYECTO) ?> != null) {
+      $(".link").removeClass("active");
+      $('.modulo' + localStorage.moduloActual<?php echo(PROYECTO) ?>).addClass("active");
+      $('#tituloPagina').html(localStorage.moduloActual<?php echo(PROYECTO) ?> + ' | LavaSecoExprex');
+    }
 
     if (localStorage.url<?php echo(PROYECTO) ?> == null) {
       $("#object-contenido").attr("data", "modulos/");
@@ -176,6 +193,7 @@
       success: function(data){
         if (data == 0) {
           localStorage.removeItem("url<?php echo(PROYECTO) ?>");
+          localStorage.removeItem('moduloActual<?php echo(PROYECTO) ?>');
           $("#cerrarSession").modal("show");
         }
       },
@@ -186,8 +204,22 @@
   }
 
   function cerrarSesion(){
-    localStorage.removeItem("url<?php echo(PROYECTO) ?>");
-    window.location.href='<?php echo $ruta_raiz ?>clases/sessionCerrar';
+    Swal.fire({
+      title: '¿Estas seguro de cerrar sesión?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Si',
+      cancelButtonText: 'No'
+    }).then((result) => {
+      if (result.value) {
+        localStorage.removeItem("url<?php echo(PROYECTO) ?>");
+        localStorage.removeItem('moduloActual<?php echo(PROYECTO) ?>');
+        window.location.href='<?php echo $ruta_raiz ?>clases/sessionCerrar';
+      }
+    });
+    
   }
 </script>
 </html>

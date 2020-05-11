@@ -101,8 +101,8 @@ body{
   width: calc(100% - 0px);
   height: calc(100% - 0px);
   border: 8px solid transparent;
-  border-top: 8px solid #8dbf44;
-  border-bottom: 8px solid #8dbf44;
+  border-top: 8px solid #336825;
+  border-bottom: 8px solid #336825;
   border-radius: 100%;
   animation: rotate 5s linear infinite;
 }
@@ -110,7 +110,7 @@ body{
 .loader-1 {
   width: calc(100% - 0px);
   height: calc(100% - 0px);
-  border: 8px solid #026839;
+  border: 8px solid #00bcc1;
   border-radius: 100%;
   animation: rotate 5s linear infinite;
 }
@@ -119,8 +119,8 @@ body{
   width: calc(100% - 0px);
   height: calc(100% - 0px);
   border: 8px solid transparent;
-  border-top: 8px solid #8dbf44;
-  border-bottom: 8px solid #8dbf44;
+  border-top: 8px solid #336825;
+  border-bottom: 8px solid #336825;
   border-radius: 100%;
   animation: rotate 1s linear infinite reverse;
 }
