@@ -30,7 +30,7 @@
       echo $lib->metaTagsRequired();
       echo $lib->iconoPag();
     ?>  
-    <title>Ingresar x2 | LavaSecoExprex</title>
+    <title>Ingresar | LavaSecoExprex</title>
     <?php  
       echo $lib->jquery();
       echo $lib->bootstrap();
