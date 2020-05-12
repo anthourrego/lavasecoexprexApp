@@ -202,7 +202,7 @@
     public function sweetAlert2(){
       $this->cadena_libreria = '
       <!-- Sweet Alert 2 -->
-      <script type="text/javascript" src="'. $this->ruta_libreria .'sweetAlert2/js/sweetAlert2.js"></script>
+      <script type="text/javascript" src="'. $this->ruta_libreria .'sweetAlert2/js/sweetalert2.js"></script>
       <link rel="stylesheet" href="'. $this->ruta_libreria .'sweetAlert2/css/sweetalert2.css"/>';
       return($this->cadena_libreria);
     }
