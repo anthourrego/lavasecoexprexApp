@@ -40,6 +40,16 @@
   ?>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light d-block d-lg-none">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+    </ul>
+  </nav>
+  <!-- /.navbar -->
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-light-success elevation-4">
     <!-- Brand Logo -->
@@ -83,31 +93,76 @@
       
       <!-- Sidebar Menu -->
       <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column nav-flat nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- Add icons to the links using the .nav-icon class
-            with font-awesome or any other icon font library -->
+        <ul class="nav nav-pills nav-sidebar flex-column nav-flat nav-child-indent" id="modulos" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item">
             <a href="<?php $ruta_raiz ?>modulos/usuarios/" data-modulo="Usuarios" target="object-contenido" class="nav-link link moduloUsuarios">
               <i class="nav-icon fas fa-users"></i>
-              <p>
-                Usuarios
-              </p>
+              <p>Usuarios</p>
             </a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item has-treeview">
             <a href="<?php $ruta_raiz ?>modulos/modulos/" data-modulo="Modulos" target="object-contenido" class="nav-link link moduloModulos">
               <i class="nav-icon fas fa-lock"></i>
+              <p>Módulos</p>
+            </a>
+          </li>
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-circle"></i>
               <p>
-                Módulos
+                Level 1
+                <i class="right fas fa-angle-left"></i>
               </p>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Level 2</p>
+                </a>
+              </li>
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>
+                    Level 2
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-dot-circle nav-icon"></i>
+                      <p>Level 3</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-dot-circle nav-icon"></i>
+                      <p>Level 3</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-dot-circle nav-icon"></i>
+                      <p>Level 3</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Level 2</p>
+                </a>
+              </li>
+            </ul>
           </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
     </div>
     <!-- /.sidebar -->
-    
   </aside>
 
   <div class="wrapper">
@@ -115,13 +170,6 @@
     <div class="content-wrapper vh-100">
       <object type="text/html" id="object-contenido" name="object-contenido" data="" class="w-100 vh-100 border-0"></object>
     </div>
-    <!-- /.content-wrapper -->
-    <!-- <footer class="main-footer">
-      <div class="float-right d-none d-sm-block">
-        <b>Version</b> 1.0
-      </div>
-      <strong>Copyright &copy; 2020.</strong> Todos los derechos reservados.
-    </footer> -->
   </div>
   <!-- ./wrapper -->
 
@@ -165,24 +213,26 @@
     //Tiempo en que valida la session
     window.idleInterval = setInterval(validarSession, 600000); // 10 minute 
 
-    $(".link").on("click", function(){
-      $(".link").removeClass("active");
-      $(this).addClass("active");
-      localStorage.moduloActual<?php echo(PROYECTO) ?> = $(this).data('modulo');
-      $('#tituloPagina').html($(this).data('modulo') + ' | LavaSecoExprex');
-    });
-
+    //modulosUsuarios();
+    
+    if (localStorage.url<?php echo(PROYECTO) ?> == null) {
+      $("#object-contenido").attr("data", "modulos/");
+    }else{
+      $("#object-contenido").attr("data", localStorage.url<?php echo(PROYECTO) ?>);
+    }
+    
     if (localStorage.moduloActual<?php echo(PROYECTO) ?> != null) {
       $(".link").removeClass("active");
       $('.modulo' + localStorage.moduloActual<?php echo(PROYECTO) ?>).addClass("active");
       $('#tituloPagina').html(localStorage.moduloActual<?php echo(PROYECTO) ?> + ' | LavaSecoExprex');
     }
 
-    if (localStorage.url<?php echo(PROYECTO) ?> == null) {
-      $("#object-contenido").attr("data", "modulos/");
-    }else{
-      $("#object-contenido").attr("data", localStorage.url<?php echo(PROYECTO) ?>);
-    }
+    $(document).on("click", ".link", function(){
+      $(".link").removeClass("active");
+      $(this).addClass("active");
+      localStorage.moduloActual<?php echo(PROYECTO) ?> = $(this).data('modulo');
+      $('#tituloPagina').html($(this).data('modulo') + ' | LavaSecoExprex');
+    });
   });
 
   function validarSession(){
@@ -198,9 +248,54 @@
         }
       },
       error: function(data){
-        alertify.error("No se ha podido validar la session");
+        Swal.fire({
+          icon: 'error',
+          html: 'No se ha podido validar la session'
+        });
       }
     });
+  }
+
+  function modulosUsuarios(){
+    $.ajax({
+      type: 'POST',
+      url: "<?php echo $ruta_raiz ?>modulos/modulos/acciones",
+      data: {
+        accion: "modulosUsuario"
+      },
+      success: function(data){
+        data = JSON.parse(data);
+        cargarMenu(data);
+        /* $("#modulos").empty();
+        for (let i = 0; i < data.msj.cantidad_registros; i++) {
+          $("#modulos").append(`
+            <li class="nav-item">
+              <a href="<?php $ruta_raiz ?>modulos/${data.msj[i].ruta}" data-modulo="${data.msj[i].tag}" target="object-contenido" class="nav-link link modulo${data.msj[i].tag}">
+                <i class="nav-icon ${data.msj[i].icono}"></i>
+                <p>${data.msj[i].tag}</p>
+              </a>
+            </li>
+          `);
+        } */
+      },
+      error: function(data){
+        Swal.fire({
+          icon: 'error',
+          html: 'No se ha podido validar los modulos'
+        });
+      },
+      complete: function(){
+        if (localStorage.moduloActual<?php echo(PROYECTO) ?> != null) {
+          $(".link").removeClass("active");
+          $('.modulo' + localStorage.moduloActual<?php echo(PROYECTO) ?>).addClass("active");
+          $('#tituloPagina').html(localStorage.moduloActual<?php echo(PROYECTO) ?> + ' | LavaSecoExprex');
+        }
+      }
+    });
+  }
+
+  function cargarMenu(data){
+    console.log(data);
   }
 
   function cerrarSesion(){
