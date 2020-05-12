@@ -12,11 +12,18 @@
 
   include_once($ruta_raiz . 'clases/librerias.php');
   include_once($ruta_raiz . 'clases/sessionActiva.php');
+  include_once($ruta_raiz . 'clases/Permisos.php');
 
   $session = new Session();
   $lib = new Libreria;
+  $permisos = new Permisos();
   
   $usuario = $session->get("usuario");
+
+  if ($permisos->validarPermiso($usuario['id'], 'usuarios') == 0) {
+    header('Location: ' . $ruta_raiz . 'modulos/');
+  }
+
 
 ?>
 
@@ -61,55 +68,55 @@
         <!-- /.card-header -->
         <div class="card-body">
         <div class="row">
-          <div class="col-6">
+          <div class="col-12 col-md-6">
             <div class="form-group">
               <input type="input" class="form-control" id="input-search" placeholder="Buscar un módulo" value="" autocomplete="off">
             </div>
             <div id="treeview1"></div>
           </div>
-          <div class="col-6">
+          <div class="col-12 col-md-6 mt-4 mt-md-0">
             <form id="formEditarModulo">
               <input type="hidden" name="accion" value="editarModulo">
               <input type="hidden" name="idModulo" value="0">
               <div class="form-group row">
-                <label class="col-12 col-md-4 align-self-center" for="modPadre">Módulo Padre <span class="text-danger">*</span>:</label>
-                <div class="col-12 col-md-8">
+                <label class="col-12 col-lg-4 align-self-center" for="modPadre">Módulo Padre <span class="text-danger">*</span>:</label>
+                <div class="col-12 col-lg-8">
                   <select class="custom-select" name="modPadre" id="selectModPadre" disabled required>
                     <option value="0" selected disabled>Raíz</option>
                   </select>
                 </div>
               </div>
               <div class="form-group row">
-                <label for="modulo-tipo" class="col-12 col-md-4">Tipo Módulo <span class="text-danger">*</span>:</label>
-                <div class="col-12 col-md-8">
+                <label for="modulo-tipo" class="col-12 col-lg-4">Tipo Módulo <span class="text-danger">*</span>:</label>
+                <div class="col-12 col-lg-8">
                   <select class="custom-select tipoModulo" name="modulo-tipo" disabled required>
                     <option value='0' disabled selected>Seleccione un opción</option>
                   </select>
                 </div>
               </div>
               <div class="form-group row">
-                <label for="nombre" class="col-12 col-md-4">Nombre <span class="text-danger">*</span>:</label>
-                <div class="col-12 col-md-8">
+                <label for="nombre" class="col-12 col-lg-4">Nombre <span class="text-danger">*</span>:</label>
+                <div class="col-12 col-lg-8">
                   <input type="text" name="nombre" class="form-control" disabled required autocomplete="off">
                   <small class="text-danger">Sin espacios y/o Caracteres especiales</small>
                 </div>
               </div>
               <div class="form-group row">
-                <label for="nombre" class="col-12 col-md-4">Etiqueta <span class="text-danger">*</span>:</label>
-                <div class="col-12 col-md-8">
+                <label for="nombre" class="col-12 col-lg-4">Etiqueta <span class="text-danger">*</span>:</label>
+                <div class="col-12 col-lg-8">
                   <input type="text" name="tag" class="form-control" disabled required autocomplete="off">
                   <small class="text-danger">Nombre a mostrar</small>
                 </div>
               </div>
               <div class="form-group row">
-                <label for="nombre" class="col-12 col-md-4">Icono <span class="text-danger">*</span>:</label>
-                <div class="col-12 col-md-8">
+                <label for="nombre" class="col-12 col-lg-4">Icono <span class="text-danger">*</span>:</label>
+                <div class="col-12 col-lg-8">
                   <input type="text" name="icono" class="form-control" placeholder="Icono de Font Awesome" disabled required autocomplete="off">
                 </div>
               </div>
               <div class="form-group row">
-                <label for="nombre" class="col-12 col-md-4">Ruta <span class="text-danger">*</span>:</label>
-                <div class="col-12 col-md-8">
+                <label for="nombre" class="col-12 col-lg-4">Ruta <span class="text-danger">*</span>:</label>
+                <div class="col-12 col-lg-8">
                   <input type="text" name="ruta" class="form-control" placeholder="Escriba la ruta final de módulo" disabled required autocomplete="off">
                 </div>
               </div>

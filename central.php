@@ -54,110 +54,40 @@
   <aside class="main-sidebar sidebar-light-success elevation-4">
     <!-- Brand Logo -->
     <div class="d-flex justify-content-between">
-      <a href="#" class="brand-link">
+      <a href="<?php echo($ruta_raiz); ?>modulos/" class="brand-link">
         <img src="<?php echo($ruta_raiz); ?>assets/img/logo.png" alt="LavaSecoExprex Logo" class="brand-image">
       </a>
       <a class="brand-link text-right mr-3" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
     </div>
     <!-- Sidebar -->
     <div class="sidebar">
-      <!-- Sidebar user (optional) -->
-      <ul class="nav nav-pills nav-sidebar flex-column nav-flat nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
-        <!-- Add icons to the links using the .nav-icon class
-          with font-awesome or any other icon font library -->
-        <li class="nav-item has-treeview user-panel mt-2 pb-2 mb-2">
-          <a href="#" class="nav-link">
-            <i class="nav-icon far fa-user-circle"></i>
-            <p>
-              <?php echo($usuario["usuario"]); ?>
-              <i class="fas fa-angle-left right"></i>
-            </p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-            <i class=""></i>
-              <a href="#" class="nav-link">
-                <i class="fas fa-user-edit nav-icon"></i>
-                <p>Perfil</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#" onclick="top.cerrarSesion();" class="nav-link">
-                <i class="fas fa-sign-out-alt nav-icon"></i>
-                <p>Cerrar Sesión</p>
-              </a>
-            </li>
-          </ul>
-        </li>
-      </ul>
-      
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column nav-flat nav-child-indent" id="modulos" data-widget="treeview" role="menu" data-accordion="false">
-          <li class="nav-item">
-            <a href="<?php $ruta_raiz ?>modulos/usuarios/" data-modulo="Usuarios" target="object-contenido" class="nav-link link moduloUsuarios">
-              <i class="nav-icon fas fa-users"></i>
-              <p>Usuarios</p>
-            </a>
-          </li>
-          <li class="nav-item has-treeview">
-            <a href="<?php $ruta_raiz ?>modulos/modulos/" data-modulo="Modulos" target="object-contenido" class="nav-link link moduloModulos">
-              <i class="nav-icon fas fa-lock"></i>
-              <p>Módulos</p>
-            </a>
-          </li>
-          <li class="nav-item has-treeview">
+          <!-- <li class="nav-item has-treeview user-panel mt-2 pb-2 mb-2">
             <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-circle"></i>
+              <i class="nav-icon far fa-user-circle"></i>
               <p>
-                Level 1
-                <i class="right fas fa-angle-left"></i>
+                <?php echo($usuario["usuario"]); ?>
+                <i class="fas fa-angle-left right"></i>
               </p>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
+              <i class=""></i>
                 <a href="#" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Level 2</p>
+                  <i class="fas fa-user-edit nav-icon"></i>
+                  <p>Perfil</p>
                 </a>
-              </li>
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>
-                    Level 2
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-dot-circle nav-icon"></i>
-                      <p>Level 3</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-dot-circle nav-icon"></i>
-                      <p>Level 3</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-dot-circle nav-icon"></i>
-                      <p>Level 3</p>
-                    </a>
-                  </li>
-                </ul>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Level 2</p>
+                <a href="#" onclick="top.cerrarSesion();" class="nav-link">
+                  <i class="fas fa-sign-out-alt nav-icon"></i>
+                  <p>Cerrar Sesión</p>
                 </a>
               </li>
             </ul>
-          </li>
+          </li>-->
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -213,7 +143,7 @@
     //Tiempo en que valida la session
     window.idleInterval = setInterval(validarSession, 600000); // 10 minute 
 
-    //modulosUsuarios();
+    modulosUsuarios();
     
     if (localStorage.url<?php echo(PROYECTO) ?> == null) {
       $("#object-contenido").attr("data", "modulos/");
@@ -224,14 +154,20 @@
     if (localStorage.moduloActual<?php echo(PROYECTO) ?> != null) {
       $(".link").removeClass("active");
       $('.modulo' + localStorage.moduloActual<?php echo(PROYECTO) ?>).addClass("active");
+      /* $(".modulo" + $('.modulo' + localStorage.moduloActual<?php echo(PROYECTO) ?>).data("modulopadre")).addClass("active"); */
       $('#tituloPagina').html(localStorage.moduloActual<?php echo(PROYECTO) ?> + ' | LavaSecoExprex');
     }
 
     $(document).on("click", ".link", function(){
+      let moduloPadre = $(this).data('modulopadre');
       $(".link").removeClass("active");
       $(this).addClass("active");
       localStorage.moduloActual<?php echo(PROYECTO) ?> = $(this).data('modulo');
+      console.log(moduloPadre);
       $('#tituloPagina').html($(this).data('modulo') + ' | LavaSecoExprex');
+      if (moduloPadre != 0) {
+        $(".modulo" + $(this).data("modulopadre")).addClass("active");
+      }
     });
   });
 
@@ -265,18 +201,36 @@
       },
       success: function(data){
         data = JSON.parse(data);
-        cargarMenu(data);
-        /* $("#modulos").empty();
-        for (let i = 0; i < data.msj.cantidad_registros; i++) {
+        if (data.success) {
+          $("#modulos").empty();
           $("#modulos").append(`
-            <li class="nav-item">
-              <a href="<?php $ruta_raiz ?>modulos/${data.msj[i].ruta}" data-modulo="${data.msj[i].tag}" target="object-contenido" class="nav-link link modulo${data.msj[i].tag}">
-                <i class="nav-icon ${data.msj[i].icono}"></i>
-                <p>${data.msj[i].tag}</p>
+            <li class="nav-item has-treeview user-panel mt-2 pb-2 mb-2">
+              <a href="#" class="nav-link">
+                <i class="nav-icon far fa-user-circle"></i>
+                <p>
+                  <?php echo($usuario["usuario"]); ?>
+                  <i class="fas fa-angle-left right"></i>
+                </p>
               </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                <i class=""></i>
+                  <a href="#" class="nav-link">
+                    <i class="fas fa-user-edit nav-icon"></i>
+                    <p>Perfil</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" onclick="top.cerrarSesion();" class="nav-link">
+                    <i class="fas fa-sign-out-alt nav-icon"></i>
+                    <p>Cerrar Sesión</p>
+                  </a>
+                </li>
+              </ul>
             </li>
           `);
-        } */
+          cargarMenu(data.msj);
+        }
       },
       error: function(data){
         Swal.fire({
@@ -288,14 +242,56 @@
         if (localStorage.moduloActual<?php echo(PROYECTO) ?> != null) {
           $(".link").removeClass("active");
           $('.modulo' + localStorage.moduloActual<?php echo(PROYECTO) ?>).addClass("active");
+          /* $(".modulo" + $('.modulo' + localStorage.moduloActual<?php echo(PROYECTO) ?>).data("modulopadre")).addClass("active"); */
           $('#tituloPagina').html(localStorage.moduloActual<?php echo(PROYECTO) ?> + ' | LavaSecoExprex');
         }
       }
     });
   }
 
-  function cargarMenu(data){
-    console.log(data);
+  function cargarMenu(data, nivel = 0, moduloPadre = '0'){
+    let modH = '';
+    let moduloPadre2 = moduloPadre;
+    for (let i = 0; i < data.length; i++) {
+      if (typeof data[i].hijos !== 'undefined') {
+        if(nivel == 0){
+          moduloPadre = data[i].tag;
+        }
+        modH += `
+          <li class="nav-item has-treeview">
+            <a href="<?php $ruta_raiz ?>modulos/${data[i].ruta}" data-modulopadre="${moduloPadre}" data-modulo="${data[i].tag}" target="object-contenido" class="nav-link link modulo${data[i].tag}">
+              <i class="nav-icon ${data[i].icono}"></i>
+              <p>
+                ${data[i].tag}
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+        `;
+
+        modH += cargarMenu(data[i].hijos, (nivel+1), moduloPadre);
+
+        modH += `
+            </ul>
+          </li>
+        `;
+      }else{
+        modH +=`
+          <li class="nav-item">
+            <a href="<?php $ruta_raiz ?>modulos/${data[i].ruta}" data-modulopadre="${moduloPadre2}" data-modulo="${data[i].tag}" target="object-contenido" class="nav-link link modulo${data[i].tag}">
+              <i class="nav-icon ${data[i].icono}"></i>
+              <p>${data[i].tag}</p>
+            </a>
+          </li>
+        `;
+      }
+
+    }
+    if(nivel === 0){
+      $("#modulos").append(modH);
+    }else{
+      return modH;
+    }
   }
 
   function cerrarSesion(){

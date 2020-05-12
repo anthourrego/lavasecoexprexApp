@@ -12,11 +12,17 @@
 
   include_once($ruta_raiz . 'clases/librerias.php');
   include_once($ruta_raiz . 'clases/sessionActiva.php');
+  include_once($ruta_raiz . 'clases/Permisos.php');
 
   $session = new Session();
   $lib = new Libreria;
-  
+  $permisos = new Permisos();
+
   $usuario = $session->get("usuario");
+
+  if ($permisos->validarPermiso($usuario['id'], 'usuarios') == 0) {
+    header('Location: ' . $ruta_raiz . 'modulos/');
+  }
 
 ?>
 
@@ -32,6 +38,7 @@
     echo $lib->sweetAlert2();
     echo $lib->jqueryValidate(0);
     echo $lib->datatables();
+    echo $lib->bootstrapTreeView();
     echo $lib->proyecto();
   ?>
 </head>
@@ -213,6 +220,28 @@
     </div>
   </div>
   
+  <!-- Modal -->
+  <div class="modal fade" id="modalPermisoUsuario" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-user-lock"></i> Permisos | <span id="modalPermisoUsuarioTitulo">N/A</span></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="min-height: 50vh !important;">
+          <div class="form-group">
+            <input type="input" class="form-control" id="input-search" placeholder="Buscar una permiso" value="" autocomplete="off">
+          </div>
+          <div id="tree"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 <?php 
   echo $lib->cambioPantalla();
@@ -523,6 +552,7 @@
               return `<div class="d-flex justify-content-center">
                         <button type="button" class="btn btn-primary btn-sm mx-1 btnEditarUsuario" data-toggle="tooltip" title="Editar" data-id="${oData.id}" data-usuario="${oData.usuario}" data-nombres="${oData.nombres}" data-apellidos="${oData.apellidos}" data-correo="${oData.correo}"><i class="fas fa-user-edit"></i></button>
                         <button type="button" class="btn btn-info btn-sm mx-1 btnCambioPass" data-toggle="tooltip" data-id="${oData.id}" data-usuario="${oData.usuario}" title="Cambiar contraseña"><i class="fas fa-key"></i></button>
+                        <button type="button" class="btn btn-secondary btn-sm mx-1 btnPermisos" data-toggle="tooltip" data-id="${oData.id}" data-usuario="${oData.usuario}" title="Permisos"><i class="fas fa-user-lock"></i></button>
                         <button type="button" class="btn btn-danger btn-sm mx-1" onClick="elminarUsuario(${oData.id}, '${oData.usuario}')"><i class="fas fa-user-minus" data-toggle="tooltip" title="Eliminar"></i></button>
                       </div>`;
             }
@@ -543,7 +573,110 @@
         [0, "asc"]
       ], //Ordenar (columna,orden)
     });
+
+    //Permisos de usuario
+    // accion boton para abrir arbol y asiganar permisos
+    $(document).on("click",".btnPermisos",function(){
+      var idUsuario = $(this).data("id");
+      $("#modalPermisoUsuarioTitulo").html($(this).data("usuario"));
+      cargarArbol(idUsuario);
+    });
   });
+
+  function cargarArbol(idUsuario){
+    top.$("#cargando").modal("show");
+    $.ajax({
+      url: "<?php echo($ruta_raiz); ?>modulos/modulos/acciones",
+      type: "POST",
+      dataType: "json",
+      data: {
+        accion: "arbolModulosUsuario",
+        idUsuario: idUsuario
+      },
+      success: function(datos){
+        console.log(datos);
+        var initSelectableTree = function() {
+          return $('#tree').treeview({
+            data: datos,
+            color: "#428bca",
+            showIcon:true,
+            showCheckbox:true,
+            expanded: true,
+            
+            //eventos del checked asigna permiso
+            onNodeChecked: function(event, node) {
+              actualizarPermiso(node.idModulo, idUsuario, 1);
+            },
+
+            //eventos cuando se quita el checked quita permiso
+            onNodeUnchecked: function (event, node) {
+              actualizarPermiso(node.idModulo, idUsuario, 0);
+            }
+          });
+        }
+
+        var $selectableTree = initSelectableTree();
+
+        var findSelectableNodes = function() {
+          return $selectableTree.treeview('search', [ $('#input-search').val(), { ignoreCase: true, exactMatch: false } ])
+        };
+        var selectableNodes = findSelectableNodes();
+
+        $('#input-search').on('keyup', function (e) {
+          //$('#tree').treeview('collapseAll', { silent:true });
+          selectableNodes = findSelectableNodes();
+        });
+
+        $("#modalPermisoUsuario").modal("show");
+      },
+      error: function(){
+        Swal.fire({
+          icon: 'error',
+          html: 'No se han encontrado datos'
+        })
+      },
+      complete: function(){
+        cerrarCargando();
+      }
+    });
+  }
+
+  function actualizarPermiso(idPermiso, idUsuario, accionPermiso){
+    $.ajax({
+      url: '<?php echo($ruta_raiz); ?>modulos/modulos/acciones',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        accion:"actualizarPermiso",
+        idUsuario: idUsuario,
+        idPermiso: idPermiso,
+        accionPermiso: accionPermiso
+      },
+      success: function(data){
+        if (data.success) {
+          Swal.fire({
+            toast: true,
+            position: 'bottom-end',
+            icon: 'success',
+            title: data.msj,
+            showConfirmButton: false,
+            timer: 5000
+          });
+        }else{
+          Swal.fire({
+            icon: 'warning',
+            html: data.msj
+          })
+        }
+      },
+      error: function(){
+        Swal.fire({
+          icon: 'error',
+          html: 'No se han enviado los datos'
+        })
+      }
+    });
+  }
 
   function elminarUsuario(id, usuario){
     Swal.fire({

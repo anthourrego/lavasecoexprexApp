@@ -16,8 +16,10 @@ require($ruta_raiz . "clases/funciones_generales.php");
 require($ruta_raiz . "clases/Conectar.php");
 require($ruta_raiz . "clases/SSP.php");
 require($ruta_raiz . "clases/Session.php");
+require($ruta_raiz . "clases/Permisos.php");
 
 $session = new Session();
+$permisos = new Permisos();
 
 $usuario = $session->get("usuario");
 
@@ -246,6 +248,146 @@ function datosModulo($id){
 
   $db->desconectar();
   return $resp;
+}
+
+function modulosUsuario($mod = 0){
+  global $usuario;
+  $db = new Bd();
+  $db->conectar();
+  $resp = [];
+
+  $modulos = $db->consulta("SELECT m.* FROM usuarios_modulos AS um INNER JOIN modulos AS m ON m.id = um.fk_modulo WHERE um.estado = 1 AND m.estado = 1 AND m.fk_modulo = :fk_modulo AND um.fk_usuario = :fk_usuario AND m.fk_modulo_tipo = 1", array(":fk_usuario" => $usuario["id"], ":fk_modulo" => $mod));
+
+  if ($modulos["cantidad_registros"] > 0) {
+    $resp["success"] = true;
+    for ($i=0; $i < $modulos["cantidad_registros"]; $i++) { 
+      $hijos = $db->consulta("SELECT m.* FROM usuarios_modulos AS um INNER JOIN modulos AS m ON m.id = um.fk_modulo WHERE um.estado = 1 AND m.estado = 1 AND m.fk_modulo = :fk_modulo AND um.fk_usuario = :fk_usuario AND m.fk_modulo_tipo = 1", array(":fk_usuario" => $usuario["id"], ":fk_modulo" => $modulos[$i]["id"]));
+  
+      if ($hijos["cantidad_registros"] > 0) {
+        
+        $resp["msj"][] = array(
+                          "id" => $modulos[$i]["id"],
+                          "nombre" => $modulos[$i]["nombre"],
+                          "ruta" => $modulos[$i]["ruta"],
+                          "tag" => $modulos[$i]["tag"],
+                          "icono" => $modulos[$i]["icono"],
+                          "hijos" => modulosUsuario($modulos[$i]["id"])
+                        );
+      }else {
+        $resp["msj"][] = array(
+                          "id" => $modulos[$i]["id"],
+                          "nombre" => $modulos[$i]["nombre"],
+                          "ruta" => $modulos[$i]["ruta"],
+                          "tag" => $modulos[$i]["tag"],
+                          "icono" => $modulos[$i]["icono"],
+                        );
+      }
+    }
+  }else{
+    $resp["success"] = false;
+    $resp["msj"] = "No tiene ningun permiso";
+  }
+
+  $db->desconectar();
+
+  if ($mod == 0) {
+    return json_encode($resp);
+  } else {
+    return $resp["msj"];
+  }
+}
+
+function arbolModulosUsuario($mod = 0){
+  $arbol = array();
+  global $permisos;
+  $chekcPermiso = false;
+  $db = new Bd();
+  $db->conectar();
+  $idUsuario = $_POST["idUsuario"];
+
+  $modulos = $db->consulta("SELECT * FROM modulos WHERE fk_modulo = :fk_modulo AND estado = 1", array(":fk_modulo" => $mod));
+
+  for ($i=0; $i < $modulos["cantidad_registros"]; $i++) { 
+    
+    $hijos = $db->consulta("SELECT * FROM modulos WHERE fk_modulo = :fk_modulo AND estado = 1", array(":fk_modulo" => $modulos[$i]["id"]));
+
+    if ($permisos->validarPermiso($idUsuario, $modulos[$i]["nombre"]) == 0) {
+      $chekcPermiso = false;
+    }else{
+      $chekcPermiso = true;
+    }
+
+    if ($hijos["cantidad_registros"] > 0) {
+      $arbol[] = array(
+                "idModulo" => $modulos[$i]["id"],
+                "text" => $modulos[$i]["tag"],
+                "nombre" => $modulos[$i]["nombre"],
+                "tags" => [$hijos['cantidad_registros']],
+                "nodes" => arbolModulos($modulos[$i]["id"]),
+                "state" => array("checked" => $chekcPermiso)
+              );
+    }else {
+      $arbol[] = array(
+                "idModulo" => $modulos[$i]["id"],
+                "text" => $modulos[$i]["tag"],
+                "nombre" => $modulos[$i]["nombre"],
+                "tags" => [$hijos['cantidad_registros']],
+                "state" => array("checked" => $chekcPermiso)
+              );
+    }
+  }
+
+  $db->desconectar();
+
+  if ($mod == 0) {
+    return json_encode($arbol);
+  } else {
+    return $arbol;
+  }
+}
+
+function actualizarPermiso(){
+  global $usuario;
+  $db = new Bd();
+  $db->conectar();
+  $resp = array();
+
+  $validar = $db->consulta("SELECT * FROM usuarios_modulos WHERE fk_modulo = :fk_modulo AND fk_usuario = :fk_usuario", array(":fk_modulo" => $_POST["idPermiso"], ":fk_usuario" => $_POST["idUsuario"]));
+
+  if ($_POST["accionPermiso"] == 1) {
+    if ($validar["cantidad_registros"] == 0) {
+      $datos = array(
+                ":fk_modulo" => $_POST["idPermiso"], 
+                ':fk_usuario' => $_POST["idUsuario"],  
+                ":fecha_creacion" => data("Y-m-d H:i:s"), 
+                ":fk_creador" => $usuario["id"], 
+                ":estado" => 1
+              );
+      $id_registro = $db->sentencia("INSERT INTO usuarios_modulos (fk_modulo, fk_usuario, fecha_creacion, fk_creador, estado) VALUES (:fk_modulo, :fk_usuario, :fecha_creacion, :fk_creador, :estado)", $datos);
+      $db->insertLogs("usuarios_modulos", $id_registro, "El permiso se ha creado", $usuario["id"]);
+      $resp["success"] = true;
+      $resp["msj"] = "El permiso se ha creado el permiso";
+    }else{
+      $db->sentencia("UPDATE usuarios_modulos SET estado = 1 WHERE id = :id", array(":id" => $validar[0]["id"]));
+      $db->insertLogs("usuarios_modulos", $validar[0]["id"], "El permiso se ha habilitado", $usuario["id"]);
+      $resp["success"] = true;
+      $resp["msj"] = "El permiso se ha habilitado";
+    }
+  }else{
+    if ($validar["cantidad_registros"] == 1) {
+      $db->sentencia("UPDATE usuarios_modulos SET estado = 0 WHERE id = :id", array(":id" => $validar[0]["id"]));
+      $db->insertLogs("usuarios_modulos", $validar[0]["id"], "El permiso se ha deshabilitado", $usuario["id"]);
+      $resp["success"] = true;
+      $resp["msj"] = "El permiso se ha deshabilitado";
+    }else{
+      $resp["success"] = false;
+      $resp["msj"] = "El permiso no es valido";
+    }
+  }
+
+  $db->desconectar();
+
+  return json_encode($resp);
 }
 
 if(@$_REQUEST['accion']){
