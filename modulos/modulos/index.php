@@ -24,7 +24,6 @@
     header('Location: ' . $ruta_raiz . 'modulos/');
   }
 
-
 ?>
 
 <!DOCTYPE html>

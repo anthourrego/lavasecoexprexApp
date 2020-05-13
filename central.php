@@ -163,7 +163,6 @@
       $(".link").removeClass("active");
       $(this).addClass("active");
       localStorage.moduloActual<?php echo(PROYECTO) ?> = $(this).data('modulo');
-      console.log(moduloPadre);
       $('#tituloPagina').html($(this).data('modulo') + ' | LavaSecoExprex');
       if (moduloPadre != 0) {
         $(".modulo" + $(this).data("modulopadre")).addClass("active");

@@ -359,7 +359,7 @@ function actualizarPermiso(){
       $datos = array(
                 ":fk_modulo" => $_POST["idPermiso"], 
                 ':fk_usuario' => $_POST["idUsuario"],  
-                ":fecha_creacion" => data("Y-m-d H:i:s"), 
+                ":fecha_creacion" => date("Y-m-d H:i:s"), 
                 ":fk_creador" => $usuario["id"], 
                 ":estado" => 1
               );
