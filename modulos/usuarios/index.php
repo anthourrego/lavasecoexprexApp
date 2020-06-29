@@ -60,8 +60,19 @@
   <section class="content">
     <div class="container-fluid">
       <div class="card">
-        <div class="card-header d-flex justify-content-end">
-          <button class="btn btn-success btnCrearUsuario" data-toggle="tooltip" title="Crear usuario"><i class="fas fa-user-plus"></i></button>
+        <div class="card-header">
+          <div class="d-flex justify-content-between">
+            <div class="input-group w-md-25 w-100">
+              <select class="custom-select" id="selectEstado" name="status">
+                <option value="1" selected>Activo</option>
+                <option value="0">Inactivo</option>
+              </select>
+              <div class="input-group-append">
+                <label class="input-group-text" for="inputGroupSelect02">Estado</label>
+              </div>
+            </div>
+            <button class="btn btn-success btnCrearUsuario" data-toggle="tooltip" title="Crear usuario"><i class="fas fa-user-plus"></i></button>
+          </div>
         </div>
         <!-- /.card-header -->
         <div class="card-body">
@@ -253,6 +264,12 @@
     //Se abre la modal para crear usuarios
     $('.btnCrearUsuario').on("click", function(){
       $("#modalCrearUsuario").modal("show");
+    });
+
+    //Cambio de estado
+    $("#selectEstado").change(function () {
+      $('#tablaUsuarios').dataTable().fnDestroy();
+      lista();
     });
 
     //Editar Usuario
@@ -503,6 +520,21 @@
       }
     });
 
+    //Permisos de usuario
+    // accion boton para abrir arbol y asiganar permisos
+    $(document).on("click",".btnPermisos",function(){
+      var idUsuario = $(this).data("id");
+      $("#modalPermisoUsuarioTitulo").html($(this).data("usuario"));
+      cargarArbol(idUsuario);
+    });
+
+    lista();
+  });
+
+  function lista(){
+
+    var estado = $("#selectEstado").val();
+
     $("#tablaUsuarios").DataTable({
       stateSave: true,
       responsive: true,
@@ -513,50 +545,37 @@
         url: "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
       },
       ajax: {
-          url: "acciones",
-          type: "GET",
-          dataType: "json",
-          data: {
-            accion: 'listaUsuarios'
-          },
-          complete: function(){
-            $('[data-toggle="tooltip"]').tooltip('hide');
-            $('[data-toggle="tooltip"]').tooltip();
-            cerrarCargando();
-          }
+        url: "acciones",
+        type: "GET",
+        dataType: "json",
+        data: {
+          accion: 'listaUsuarios',
+          estado: estado
+        },
+        complete: function(){
+          $('[data-toggle="tooltip"]').tooltip('hide');
+          $('[data-toggle="tooltip"]').tooltip();
+          cerrarCargando();
+        }
       },
       columns: [
-          {
-            data: "id"
-          },
-          {
-            data: "usuario"
-          },
-          {
-            data: "nombres"
-          },
-          {
-            data: "apellidos"
-          },
-          {
-            data: "correo"
-          },
-          {
-            data: "fecha_creacion"
-          },
-          {
-            data: "creador"
-          },
-          {
-            "render": function (nTd, sData, oData, iRow, iCol) {
-              return `<div class="d-flex justify-content-center">
-                        <button type="button" class="btn btn-primary btn-sm mx-1 btnEditarUsuario" data-toggle="tooltip" title="Editar" data-id="${oData.id}" data-usuario="${oData.usuario}" data-nombres="${oData.nombres}" data-apellidos="${oData.apellidos}" data-correo="${oData.correo}"><i class="fas fa-user-edit"></i></button>
-                        <button type="button" class="btn btn-info btn-sm mx-1 btnCambioPass" data-toggle="tooltip" data-id="${oData.id}" data-usuario="${oData.usuario}" title="Cambiar contraseña"><i class="fas fa-key"></i></button>
-                        <button type="button" class="btn btn-secondary btn-sm mx-1 btnPermisos" data-toggle="tooltip" data-id="${oData.id}" data-usuario="${oData.usuario}" title="Permisos"><i class="fas fa-user-lock"></i></button>
-                        <button type="button" class="btn btn-danger btn-sm mx-1" onClick="elminarUsuario(${oData.id}, '${oData.usuario}')"><i class="fas fa-user-minus" data-toggle="tooltip" title="Eliminar"></i></button>
-                      </div>`;
-            }
+        { data: "id" },
+        { data: "usuario" },
+        { data: "nombres" },
+        { data: "apellidos" },
+        { data: "correo" },
+        { data: "fecha_creacion" },
+        { data: "creador" },
+        {
+          "render": function (nTd, sData, oData, iRow, iCol) {
+            return `<div class="d-flex justify-content-center">
+                      <button type="button" class="btn btn-primary btn-sm mx-1 btnEditarUsuario" data-toggle="tooltip" title="Editar" data-id="${oData.id}" data-usuario="${oData.usuario}" data-nombres="${oData.nombres}" data-apellidos="${oData.apellidos}" data-correo="${oData.correo}"><i class="fas fa-user-edit"></i></button>
+                      <button type="button" class="btn btn-info btn-sm mx-1 btnCambioPass" data-toggle="tooltip" data-id="${oData.id}" data-usuario="${oData.usuario}" title="Cambiar contraseña"><i class="fas fa-key"></i></button>
+                      <button type="button" class="btn btn-secondary btn-sm mx-1 btnPermisos" data-toggle="tooltip" data-id="${oData.id}" data-usuario="${oData.usuario}" title="Permisos"><i class="fas fa-user-lock"></i></button>
+                      <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
+                    </div>`;
           }
+        }
       ],
       columnDefs: [
         {
@@ -573,15 +592,7 @@
         [0, "asc"]
       ], //Ordenar (columna,orden)
     });
-
-    //Permisos de usuario
-    // accion boton para abrir arbol y asiganar permisos
-    $(document).on("click",".btnPermisos",function(){
-      var idUsuario = $(this).data("id");
-      $("#modalPermisoUsuarioTitulo").html($(this).data("usuario"));
-      cargarArbol(idUsuario);
-    });
-  });
+  }
 
   function cargarArbol(idUsuario){
     top.$("#cargando").modal("show");
@@ -674,6 +685,56 @@
           icon: 'error',
           html: 'No se han enviado los datos'
         })
+      }
+    });
+  }
+
+  function cambiarEstado(datos){
+    Swal.fire({
+      title: `¿Estas seguro de ${datos['estado'] == 1 ? 'inhabilitar' : 'habilitar'} el usuario ${datos['usuario']} ?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: `<i class="fas ${datos['estado'] == 1 ? 'fa-trash-alt' : 'fa-check'}"></i> Si`,
+      cancelButtonText: '<i class="fa fa-times"></i> No'
+    }).then((result) => {
+      if (result.value) {
+        $.ajax({
+          url: 'acciones',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            accion: "cambiarEstado", 
+            id: datos['id'],
+            usuario: datos['usuario'],
+            estado: datos['estado'],
+          },
+          success: function(data){
+            if (data == 1) {
+              $("#tablaUsuarios").DataTable().ajax.reload();
+              Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: 'success',
+                title: `Se ha ${datos['estado'] == 1 ? 'inhabilitado' : 'habilitado'} el usuario ${datos['usuario']}`,
+                showConfirmButton: false,
+                timer: 5000
+              });
+            }else{
+              Swal.fire({
+                icon: 'warning',
+                html: `Error al ${datos['estado'] == 1 ? 'inhabilitar' : 'habilitar'} el usuario ${datos['usuario']}`
+              })
+            }
+          },
+          error: function(){
+            Swal.fire({
+              icon: 'error',
+              html: 'No se han enviado los datos'
+            })
+          }
+        });
       }
     });
   }

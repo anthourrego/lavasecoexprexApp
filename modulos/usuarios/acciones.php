@@ -95,6 +95,7 @@ function listaUsuarios(){
               array( 'db' => '`u1`.`apellidos`',           'dt' => 'apellidos',       'field' => 'apellidos' ),
               array( 'db' => '`u1`.`correo`',              'dt' => 'correo',          'field' => 'correo' ),
               array( 'db' => '`u1`.`fecha_creacion`',      'dt' => 'fecha_creacion',  'field' => 'fecha_creacion' ),
+              array( 'db' => '`u1`.`estado`',              'dt' => 'estado',          'field' => 'estado' ),
               array( 'db' => '`u2`.`usuario`',             'dt' => 'creador',         'field' => 'creador', 'as' => 'creador' )
             );
     
@@ -106,19 +107,26 @@ function listaUsuarios(){
                 );
       
   $joinQuery = "FROM `{$table}` AS `u1` INNER JOIN `{$table}` AS `u2` ON `u1`.`fk_creador` = `u2`.`id`";
-  $extraWhere= "`u1`.`estado` = 1";
+  $extraWhere= "`u1`.`estado` = " . $_REQUEST['estado'];
   $groupBy = "";
   $having = "";
   return json_encode(SSP::simple($_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere, $groupBy, $having));
 }
 
-function inHabilitarUsuario(){
+function cambiarEstado(){
   global $usuario;
   $db = new Bd();
   $db->conectar();
+  
+  $estado = $_POST["estado"] == 1 ? 'inhabilita' : 'habilita';
 
-  $db->sentencia("UPDATE usuarios SET estado = 0 WHERE id = :id", array(":id" => $_POST["id"]));
-  $db->insertLogs("usuarios", $_POST["id"], "Se inhabilita el usuario {$_POST['usuario']}", $usuario["id"]);
+  $array = array(
+    ":id" => $_POST["id"],
+    ":estado" => ($_POST["estado"] == 1 ? 0 : 1),
+  );
+
+  $db->sentencia("UPDATE usuarios SET estado = :estado WHERE id = :id", $array);
+  $db->insertLogs("usuarios", $_POST["id"], "Se " . $estado ." el usuario {$_POST['usuario']}", $usuario["id"]);
 
   $db->desconectar();
 
