@@ -738,54 +738,5 @@
       }
     });
   }
-
-  function elminarUsuario(id, usuario){
-    Swal.fire({
-      title: "¿Estas seguro de eliminar el usuario " + usuario + "?",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: '<i class="far fa-trash-alt"></i> Si',
-      cancelButtonText: '<i class="fa fa-times"></i> No'
-    }).then((result) => {
-      if (result.value) {
-        $.ajax({
-          url: 'acciones',
-          type: 'POST',
-          dataType: 'json',
-          data: {
-            accion: "inHabilitarUsuario", 
-            id: id,
-            usuario: usuario
-          },
-          success: function(data){
-            if (data == 1) {
-              $("#tablaUsuarios").DataTable().ajax.reload();
-              Swal.fire({
-                toast: true,
-                position: 'bottom-end',
-                icon: 'success',
-                title: "Se ha eliminado el usuario " + usuario,
-                showConfirmButton: false,
-                timer: 5000
-              });
-            }else{
-              Swal.fire({
-                icon: 'warning',
-                html: "Error al eliminar el usuario " + usuario
-              })
-            }
-          },
-          error: function(){
-            Swal.fire({
-              icon: 'error',
-              html: 'No se han enviado los datos'
-            })
-          }
-        });
-      }
-    });
-  }
 </script>
 </html>
