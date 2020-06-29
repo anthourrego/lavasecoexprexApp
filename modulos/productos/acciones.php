@@ -62,9 +62,9 @@ function validarNombre($nombre, $id = 0){
   $resp = 0;
 
   if ($id == 0) {
-    $verificar = $db->consulta("SELECT nombre FROM productos WHERE nombre = :nombre AND estado = 1", array(":nombre" => $nombre));
+    $verificar = $db->consulta("SELECT nombre FROM productos WHERE nombre = :nombre", array(":nombre" => $nombre));
   } else {
-    $verificar = $db->consulta("SELECT nombre FROM productos WHERE nombre = :nombre AND id != :id AND estado = 1", array(":nombre" => $nombre, ":id" => $id));
+    $verificar = $db->consulta("SELECT nombre FROM productos WHERE nombre = :nombre AND id != :id", array(":nombre" => $nombre, ":id" => $id));
   }
   
   if ($verificar["cantidad_registros"] > 0) {
@@ -76,17 +76,18 @@ function validarNombre($nombre, $id = 0){
   return $resp;
 }
 
-function listaProductos(){
+function lista(){
   $table      = 'productos';
   // Table's primary key
   $primaryKey = 'id';
   // indexes
   $columns = array(
-              array( 'db' => '`p`.`id`',                  'dt' => 'id',             'field' => 'id' ),
-              array( 'db' => '`p`.`nombre`',              'dt' => 'nombre',         'field' => 'nombre' ),
-              array( 'db' => '`p`.`precio`',              'dt' => 'precio',         'field' => 'precio' ),
-              array( 'db' => '`p`.`fecha_creacion`',      'dt' => 'fecha_creacion', 'field' => 'fecha_creacion' ),
-              array( 'db' => '`u`.`usuario`',             'dt' => 'creador',        'field' => 'creador', 'as' => 'creador' )
+              array( 'db' => 'p.id',               'dt' => 'id',             'field' => 'id' ),
+              array( 'db' => 'p.nombre',           'dt' => 'nombre',         'field' => 'nombre' ),
+              array( 'db' => 'p.precio',           'dt' => 'precio',         'field' => 'precio' ),
+              array( 'db' => 'p.fecha_creacion',   'dt' => 'fecha_creacion', 'field' => 'fecha_creacion' ),
+              array( 'db' => 'p.estado',           'dt' => 'estado',         'field' => 'estado' ),
+              array( 'db' => 'u.usuario',          'dt' => 'creador',        'field' => 'creador', 'as' => 'creador' )
             );
     
   $sql_details = array(
@@ -96,25 +97,33 @@ function listaProductos(){
                   'host' => BDSERVER
                 );
       
-  $joinQuery = "FROM `{$table}` AS `p` INNER JOIN `usuarios` AS `u` ON `p`.`fk_creador` = `u`.`id`";
-  $extraWhere= "`p`.`estado` = 1";
+  $joinQuery = "FROM {$table} AS p INNER JOIN usuarios AS u ON p.fk_creador = u.id";
+  $extraWhere= "p.estado = " . $_REQUEST["estado"];
   $groupBy = "";
   $having = "";
   return json_encode(SSP::simple($_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery, $extraWhere, $groupBy, $having));
 }
 
-function inHabilitarProducto(){
+function cambiarEstado(){
   global $usuario;
   $db = new Bd();
   $db->conectar();
+  
+  $estado = $_POST["estado"] == 1 ? 'inhabilita' : 'habilita';
 
-  $db->sentencia("UPDATE productos SET estado = 0 WHERE id = :id", array(":id" => $_POST["id"]));
-  $db->insertLogs("productos", $_POST["id"], "Se inhabilita el producto {$_POST['nombre']}", $usuario["id"]);
+  $array = array(
+    ":id" => $_POST["id"],
+    ":estado" => ($_POST["estado"] == 1 ? 0 : 1),
+  );
+
+  $db->sentencia("UPDATE productos SET estado = :estado WHERE id = :id", $array);
+  $db->insertLogs("usuarios", $_POST["id"], "Se " . $estado ." el producto {$_POST['nombre']}", $usuario["id"]);
 
   $db->desconectar();
 
   return json_encode(1);
 }
+
 
 function editarProducto(){
   global $usuario;
@@ -122,26 +131,25 @@ function editarProducto(){
   $resp = array();
   $db->conectar();
   $datosProducto = datosProducto($_POST["id"]);
-  $nombre = cadena_db_insertar($_POST["nombre"]);
 
   if ($datosProducto != 0) {
-    if ($datosProducto['nombre'] != $nombre || $datosProducto['precio'] != $_POST["precio"]) {
-      if (validarNombre($nombre, $_POST["id"]) == 0) {
+    if ($datosProducto['nombre'] != $_POST["nombre"] || $datosProducto['precio'] != $_POST["precio"]) {
+      if (validarNombre($_POST["nombre"], $_POST["id"]) == 0) {
         $datos = array(
                   ":id" => $_POST["id"],
-                  ":nombre" => $nombre,
+                  ":nombre" => $_POST["nombre"],
                   ":precio" => $_POST["precio"]
                 );
         
         $db->sentencia("UPDATE productos SET nombre = :nombre, precio = :precio WHERE id = :id", $datos);
   
-        $db->insertLogs("productos", $_POST["id"], "Se edita el producto {$nombre}", $usuario["id"]);
+        $db->insertLogs("productos", $_POST["id"], "Se edita el producto {$_POST['nombre']}", $usuario["id"]);
   
         $resp["success"] = true;
         $resp["msj"] = "El producto se ha actualiza correctamente";
       } else {
         $resp["success"] = false;
-        $resp["msj"] = "El nombre <b>{$nombre}</b> ya se encuentra en uso";
+        $resp["msj"] = "El nombre <b>{$_POST['nombre']}</b> ya se encuentra en uso";
       }
     }else{
       $resp["success"] = false;
