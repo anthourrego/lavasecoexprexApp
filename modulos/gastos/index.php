@@ -144,7 +144,6 @@
       $("#formCrear :input").removeClass("is-invalid");
       $("#formCrear :input[name='id']").val(datos["id"]);
       $("#formCrear :input[name='nombre']").val(datos["nombre"]);
-      $("#formCrear :input[name='precio']").val(datos["precio"]);
       $("#formCrear :input[name='accion']").val('editar');
       $('#btnCrear').html(`<i class="fas fa-paper-plane"></i> Editar`);
       $("#modalCrear").modal("show");
