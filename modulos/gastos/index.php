@@ -20,7 +20,7 @@
 
   $usuario = $session->get("usuario");
 
-  if ($permisos->validarPermiso($usuario['id'], 'productos') == 0) {
+  if ($permisos->validarPermiso($usuario['id'], 'gatos') == 0) {
     header('Location: ' . $ruta_raiz . 'modulos/');
   }
 
