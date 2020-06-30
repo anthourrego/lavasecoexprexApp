@@ -62,7 +62,7 @@
       <div class="card">
         <div class="card-header">
           <div class="d-flex justify-content-between">
-            <div class="input-group w-md-25 w-100">
+            <div class="input-group w-md-25 w-75">
               <select class="custom-select" id="selectEstado" name="status">
                 <option value="1" selected>Activo</option>
                 <option value="0">Inactivo</option>
