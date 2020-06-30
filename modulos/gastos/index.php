@@ -20,7 +20,7 @@
 
   $usuario = $session->get("usuario");
 
-  if ($permisos->validarPermiso($usuario['id'], 'gatos') == 0) {
+  if ($permisos->validarPermiso($usuario['id'], 'gastos') == 0) {
     header('Location: ' . $ruta_raiz . 'modulos/');
   }
 
@@ -49,7 +49,7 @@
     <div class="container">
       <div class="row mb-2">
         <div class="col-12">
-          <h1 class="m-0 text-dark">Gastos tipo</h1>
+          <h1 class="m-0 text-dark"><i class="fas fa-file-invoice-dollar"></i> Gastos tipo</h1>
         </div><!-- /.col -->
       </div><!-- /.row -->
     </div><!-- /.container-fluid -->

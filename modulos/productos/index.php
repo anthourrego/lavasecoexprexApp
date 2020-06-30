@@ -49,7 +49,7 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-12">
-          <h1 class="m-0 text-dark">Productos</h1>
+          <h1 class="m-0 text-dark"><i class="fas fa-shopping-bag"></i> Productos</h1>
         </div><!-- /.col -->
       </div><!-- /.row -->
     </div><!-- /.container-fluid -->

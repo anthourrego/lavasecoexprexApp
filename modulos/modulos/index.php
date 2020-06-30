@@ -48,7 +48,7 @@
     <div class="container">
       <div class="row mb-2">
         <div class="col-12">
-          <h1 class="m-0 text-dark">Módulos</h1>
+          <h1 class="m-0 text-dark"><i class="fab fa-modx"></i> Módulos</h1>
         </div><!-- /.col -->
       </div><!-- /.row -->
     </div><!-- /.container-fluid -->
