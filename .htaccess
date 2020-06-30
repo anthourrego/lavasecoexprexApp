@@ -1,7 +1,7 @@
 #No permite ver los archivos de las carpetas
 #Options All -Indexes
 
-#ErrorDocument 404 /vista/404.php
+ErrorDocument 404 https://app.lavasecoexprex.com/404
 
 <IfModule mod_rewrite.c>
   RewriteEngine on
