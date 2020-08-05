@@ -124,7 +124,6 @@ function cambiarEstado(){
   return json_encode(1);
 }
 
-
 function editarServicio(){
   global $usuario;
   $db = new Bd();
@@ -176,6 +175,31 @@ function datosServicio($id){
 
   $db->desconectar();
   return $resp;
+}
+
+function buscarCliente(){
+
+  global $usuario;
+  $db = new Bd();
+  $db->conectar();
+  $resp = array();
+
+  $datos = $db->consulta("SELECT * FROM clientes WHERE estado = 1 and telefono = ".$_POST['telefono']);
+
+  if ($datos["cantidad_registros"] > 0) {
+      $resp['success'] = true;
+      $resp['msj'] = $datos;
+    } else {
+      $resp['success'] = false;
+      $resp['msj'] = 'no hay datos';
+    }
+
+
+
+  $db->desconectar();
+
+  return json_encode($resp);
+
 }
 
 if(@$_REQUEST['accion']){

@@ -49,7 +49,7 @@
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-12">
-          <h1 class="m-0 text-dark"><i class="fas fa-concierge-bell"></i> Servicios </h1>
+          <h1 class="m-0 text-dark"><i class="fas fa-money-check-alt"></i> Facturas </h1>
         </div><!-- /.col -->
       </div><!-- /.row -->
     </div><!-- /.container-fluid -->
@@ -71,7 +71,7 @@
                 <label class="input-group-text" for="inputGroupSelect02">Estado</label>
               </div>
             </div>
-            <button class="btn btn-success btnCrearServicio" data-toggle="tooltip" title="Crear Servicio"><i class="fas fa-plus"></i></button>
+            <button class="btn btn-success btnCrearFactura" data-toggle="tooltip" title="Crear Factura"><i class="fas fa-plus"></i></button>
           </div>
         </div>
         <!-- /.card-header -->
@@ -94,14 +94,40 @@
   <!-- /.content -->
 
   <!-- Modal Crear Producto -->
-  <div class="modal fade" id="modalCrearServicio" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div class="modal fade" id="modalCrearfactura" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="tituloModalCrear">titulo</h5>
         </div>
-        <form id="formCrearServicio" autocomplete="off">
-          <input type="hidden" name="accion" value="crearServicio">
+
+        <h5 class="text-center mt-1"> Datos Cliente</h5>
+        <form id="formClientes">
+          <input type="hidden" name="accion" value="crearCliente">
+          <input type="hidden" name="id" value="">
+          <div class="modal-body">
+            <label for="telefono">Telefono <span class="text-danger">*</span></label>
+            <div class="input-group form-group">
+              <input type="text" name="telefono" class="form-control" placeholder="Escriba el telefono"  aria-describedby="button-search">
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" id="btnBuscar">Buscar</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="nombre">Nombre<span class="text-danger">*</span></label>
+              <input type="text" name="nombre" class="form-control" placeholder="Escriba el nombre" required autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="direccion">Dirección <span class="text-danger">*</span></label>
+              <textarea class="form-control" required name="direccion" rows="3" placeholder="Escriba una dirección"></textarea>
+            </div>
+          </div>
+          
+        
+        </form>
+
+        <form id="formCrearFactura" autocomplete="off">
+          <input type="hidden" name="accion" value="crearFactura">
           <input type="hidden" name="id" value="">
           <div class="modal-body">
             <div class="form-group">
@@ -115,7 +141,7 @@
           </div>
           <div class="modal-footer d-flex justify-content-between">
             <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Cerrar</button>
-            <button id="btnCrearServicio" type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Crear</button>
+            <button id="btnCrearFactura" type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Crear</button>
           </div>
         </form>
       </div>
@@ -131,26 +157,31 @@
     $('[data-toggle="tooltip"]').tooltip();
 
     //Crear
-    $('.btnCrearServicio').on("click", function(){
-      $("#formCrearServicio")[0].reset();
-      $("#formCrearServicio :input[name='accion']").val('crearServicio');
-      $("#tituloModalCrear").html(`<i class="fas fa-plus"></i> Crear Servicio`);
-      $('#btnCrearServicio').html(`<i class="fas fa-paper-plane"></i> Crear`);
-      $("#modalCrearServicio").modal("show");
+    $('.btnCrearFactura').on("click", function(){
+      $("#formCrearFactura")[0].reset();
+      $("#formCrearFactura :input[name='accion']").val('crearFactura');
+      $("#tituloModalCrear").html(`<i class="fas fa-plus"></i> Crear Factura`);
+      $('#btnCrearFactura').html(`<i class="fas fa-paper-plane"></i> Crear`);
+      $("#modalCrearfactura").modal("show");
     });
 
+
+    $("#btnBuscar").on("click", ()=> {
+      buscarCliente();
+    })
+
     //Editar
-    $(document).on("click", ".btnEditarServicio", function(){
+    $(document).on("click", ".btnEditarFactura", function(){
       let datos = $(this).data("datos");
-      $("#tituloModalCrear").html(`<i class="fas fa-edit"></i> Editar Servicio | ${datos['nombre']}`);
-      $("#formCrearServicio :input").removeClass("is-valid");
-      $("#formCrearServicio :input").removeClass("is-invalid");
-      $("#formCrearServicio :input[name='id']").val(datos["id"]);
-      $("#formCrearServicio :input[name='nombre']").val(datos["nombre"]);
-      $("#formCrearServicio :input[name='precio']").val(datos["precio"]);
-      $("#formCrearServicio :input[name='accion']").val('editarServicio');
-      $('#btnCrearServicio').html(`<i class="fas fa-paper-plane"></i> Editar`);
-      $("#modalCrearServicio").modal("show");
+      $("#tituloModalCrear").html(`<i class="fas fa-edit"></i> Editar Factura | ${datos['nombre']}`);
+      $("#formCrearFactura :input").removeClass("is-valid");
+      $("#formCrearFactura :input").removeClass("is-invalid");
+      $("#formCrearFactura :input[name='id']").val(datos["id"]);
+      $("#formCrearFactura :input[name='nombre']").val(datos["nombre"]);
+      $("#formCrearFactura :input[name='precio']").val(datos["precio"]);
+      $("#formCrearFactura :input[name='accion']").val('editarFactura');
+      $('#btnCrearFactura').html(`<i class="fas fa-paper-plane"></i> Editar`);
+      $("#modalCrearfactura").modal("show");
     });
 
 
@@ -160,10 +191,10 @@
       lista();
     });
 
-    $("#formCrearServicio").submit(function(event){
-      estado = $("#formCrearServicio :input[name='accion']").val() == 'crearServicio' ? 1 : 2;
+    $("#formCrearFactura").submit(function(event){
+      estado = $("#formCrearFactura :input[name='accion']").val() == 'crearFactura' ? 1 : 2;
       event.preventDefault();
-      if($("#formCrearServicio").valid()){
+      if($("#formCrearFactura").valid()){
         $.ajax({
           type: "POST",
           url: "acciones",
@@ -173,18 +204,18 @@
           processData: false,
           data: new FormData(this),
           beforeSend: function(){
-            $('#formCrearServicio :input').attr("disabled", true);
+            $('#formCrearFactura :input').attr("disabled", true);
             //Desabilitamos el botón
-            $('#btnCrearServicio').html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${estado == 1 ? 'Creando' : 'Editando'}...`);
-            $("#btnCrearServicio").attr("disabled" , true);
+            $('#btnCrearFactura').html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${estado == 1 ? 'Creando' : 'Editando'}...`);
+            $("#btnCrearFactura").attr("disabled" , true);
           },
           success: function(data){
             if (data.success) {
               $("#tabla").DataTable().ajax.reload();
-              $("#formCrearServicio")[0].reset();
-              $("#formCrearServicio :input").removeClass("is-valid");
-              $("#formCrearServicio :input").removeClass("is-invalid");
-              $("#modalCrearServicio").modal("hide");
+              $("#formCrearFactura")[0].reset();
+              $("#formCrearFactura :input").removeClass("is-valid");
+              $("#formCrearFactura :input").removeClass("is-invalid");
+              $("#modalCrearfactura").modal("hide");
               Swal.fire({
                 toast: true,
                 position: 'bottom-end',
@@ -207,15 +238,15 @@
               html: 'Error al registrar.'
             });
             //Habilitamos el botón
-            $('#formCrearServicio :input').attr("disabled", false);
-            $('#btnCrearServicio').html(`<i class="fas fa-paper-plane"></i> ${estado == 1 ? 'Crear' : 'Editar'}`);
-            $("#btnCrearServicio").attr("disabled", false);
+            $('#formCrearFactura :input').attr("disabled", false);
+            $('#btnCrearFactura').html(`<i class="fas fa-paper-plane"></i> ${estado == 1 ? 'Crear' : 'Editar'}`);
+            $("#btnCrearFactura").attr("disabled", false);
           },
           complete: function(){
             //Habilitamos el botón
-            $('#formCrearServicio :input').attr("disabled", false);
-            $('#btnCrearServicio').html(`<i class="fas fa-paper-plane"></i> ${estado == 1 ? 'Crear' : 'Editar'}`);
-            $("#btnCrearServicio").attr("disabled", false);
+            $('#formCrearFactura :input').attr("disabled", false);
+            $('#btnCrearFactura').html(`<i class="fas fa-paper-plane"></i> ${estado == 1 ? 'Crear' : 'Editar'}`);
+            $("#btnCrearFactura").attr("disabled", false);
           }
         });
       }
@@ -223,6 +254,31 @@
 
     lista();
   });
+
+  function buscarCliente(){
+    $.ajax({
+      url: 'acciones',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        accion: "buscarCliente", 
+        telefono: $("#formClientes :input[name='telefono']").val()
+      },
+      success: function(data){
+        if(data.success){
+          $("#formClientes :input[name='telefono']").val();
+          $("#formClientes :input[name='nombre']").val(data.msj[0].nombre);
+          $("#formClientes :input[name='direccion']").val(data.msj[0].direccion);
+        }
+      },
+      error: function(){
+        Swal.fire({
+          icon: 'error',
+          html: 'No se han enviado los datos'
+        })
+      }
+    });
+  }
 
   function lista(){
 
@@ -258,7 +314,7 @@
         {
           "render": function (nTd, sData, oData, iRow, iCol) {
             return `<div class="d-flex justify-content-center">
-                      <button type="button" class="btn btn-primary btn-sm mx-1 btnEditarServicio" data-toggle="tooltip" title="Editar" data-datos='${JSON.stringify(oData)}'><i class="fas fa-edit"></i></button>
+                      <button type="button" class="btn btn-primary btn-sm mx-1 btnEditarFactura" data-toggle="tooltip" title="Editar" data-datos='${JSON.stringify(oData)}'><i class="fas fa-edit"></i></button>
                       <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
                     </div>`;
           }
@@ -287,7 +343,7 @@
 
   function cambiarEstado(datos){
     Swal.fire({
-      title: `¿Estas seguro de ${datos['estado'] == 1 ? 'inhabilitar' : 'habilitar'} el servicio ${datos['nombre']} ?`,
+      title: `¿Estas seguro de ${datos['estado'] == 1 ? 'inhabilitar' : 'habilitar'} la factura ${datos['nombre']} ?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -313,14 +369,14 @@
                 toast: true,
                 position: 'bottom-end',
                 icon: 'success',
-                title: `Se ha ${datos['estado'] == 1 ? 'inhabilitado' : 'habilitado'} el servicio ${datos['nombre']}`,
+                title: `Se ha ${datos['estado'] == 1 ? 'inhabilitado' : 'habilitado'} la factura ${datos['nombre']}`,
                 showConfirmButton: false,
                 timer: 5000
               });
             }else{
               Swal.fire({
                 icon: 'warning',
-                html: `Error al ${datos['estado'] == 1 ? 'inhabilitar' : 'habilitar'} el servicio ${datos['nombre']}`
+                html: `Error al ${datos['estado'] == 1 ? 'inhabilitar' : 'habilitar'} la factura ${datos['nombre']}`
               })
             }
           },
