@@ -21,35 +21,34 @@ $session = new Session();
 
 $usuario = $session->get("usuario");
 
-function crearServicio(){
+function facturar(){
   $db = new Bd();
   $db->conectar();
   $resp = array();
   global $usuario;
-  $nombre = cadena_db_insertar($_POST["nombre"]);
 
-  if (validarNombre($nombre) == 0) {
-    $datos = array(
-              ":nombre" => $nombre, 
-              ":precio" => $_POST["precio"], 
-              ":fecha_creacion" => date("Y-m-d H:i:s"), 
-              ":fk_creador" => $usuario["id"], 
-              ":estado" => 1 
-            );
-    $id_registro = $db->sentencia("INSERT INTO servicios (nombre, precio, fecha_creacion, fk_creador, estado) VALUES (:nombre, :precio, :fecha_creacion, :fk_creador, :estado)", $datos);
-  
-    if ($id_registro > 0) {
-      $db->insertLogs("servicios", $id_registro, "Se crea el prudcto {$nombre}", $usuario["id"]);
-      $resp['success'] = true;
-      $resp['msj'] = "El servicio {$nombre} se ha creado";
-    } else {
-      $resp['success'] = false;
-      $resp['msj'] = 'Error al realizar el registro';
-    }
-  }else{
+
+  $datos = array(
+    ":fk_cliente" => $_POST["idCliente"],
+    ":total" => $_POST["total"], 
+    ":abono" => $_POST["abono"], 
+    ":fecha_creacion" => date("Y-m-d H:i:s"), 
+    ":fk_creador" => $usuario["id"],
+    ":datos_tabla" => $_POST["datosTabla"],
+    ":fecha_entrega" => date("Y-m-d", strtotime($_POST["fechaEntrega"])),
+    ":estado" => 1 
+  );
+  $id_factura = $db->sentencia("INSERT INTO facturas (fk_cliente, total, abono, fecha_creacion, fk_creador, datos_tabla, fecha_entrega, estado) VALUES (:fk_cliente, :total, :abono, :fecha_creacion, :fk_creador, :datos_tabla, :fecha_entrega, :estado)", $datos);
+
+  if ($id_factura > 0) {
+    $db->insertLogs("facturas", $id_factura, " factura numero  {$id_factura}", $usuario["id"]);
+    $resp['success'] = true;
+    $resp['msj'] = "factura {$id_factura} generada";
+  } else {
     $resp['success'] = false;
-    $resp['msj'] = "El nombre <b>{$nombre}</b> ya se encuentra en uso";
+    $resp['msj'] = 'Error al realizar el registro';
   }
+  
 
   $db->desconectar();
 
@@ -77,17 +76,21 @@ function validarNombre($nombre, $id = 0){
 }
 
 function lista(){
-  $table      = 'servicios';
+  $table      = 'facturas';
   // Table's primary key
   $primaryKey = 'id';
   // indexes
   $columns = array(
               array( 'db' => 'p.id',               'dt' => 'id',             'field' => 'id' ),
-              array( 'db' => 'p.nombre',           'dt' => 'nombre',         'field' => 'nombre' ),
-              array( 'db' => 'p.precio',           'dt' => 'precio',         'field' => 'precio' ),
+              array( 'db' => 'p.fk_cliente',           'dt' => 'fk_cliente',         'field' => 'fk_cliente' ),
+              array( 'db' => 'p.fecha_entrega',           'dt' => 'fecha_entrega',         'field' => 'fecha_entrega' ),
               array( 'db' => 'p.fecha_creacion',   'dt' => 'fecha_creacion', 'field' => 'fecha_creacion' ),
+              array( 'db' => 'p.total',           'dt' => 'total',         'field' => 'total' ),
+              array( 'db' => 'p.abono',           'dt' => 'abono',         'field' => 'abono' ),
               array( 'db' => 'p.estado',           'dt' => 'estado',         'field' => 'estado' ),
-              array( 'db' => 'u.usuario',          'dt' => 'creador',        'field' => 'creador', 'as' => 'creador' )
+              array( 'db' => 'p.datos_tabla',           'dt' => 'datos_tabla',         'field' => 'datos_tabla' ),
+              array( 'db' => 'u.usuario',          'dt' => 'creador',        'field' => 'creador', 'as' => 'creador' ),
+              array( 'db' => 'c.telefono',          'dt' => 'telefono_cliente',  'field' => 'telefono_cliente', 'as' => 'telefono_cliente' )
             );
     
   $sql_details = array(
@@ -97,7 +100,7 @@ function lista(){
                   'host' => BDSERVER
                 );
       
-  $joinQuery = "FROM {$table} AS p INNER JOIN usuarios AS u ON p.fk_creador = u.id";
+  $joinQuery = "FROM {$table} AS p INNER JOIN usuarios AS u ON p.fk_creador = u.id INNER JOIN clientes AS c on p.fk_cliente = c.id";
   $extraWhere= "p.estado = " . $_REQUEST["estado"];
   $groupBy = "";
   $having = "";
@@ -116,8 +119,8 @@ function cambiarEstado(){
     ":estado" => ($_POST["estado"] == 1 ? 0 : 1),
   );
 
-  $db->sentencia("UPDATE servicios SET estado = :estado WHERE id = :id", $array);
-  $db->insertLogs("usuarios", $_POST["id"], "Se " . $estado ." el producto {$_POST['nombre']}", $usuario["id"]);
+  $db->sentencia("UPDATE facturas SET estado = :estado WHERE id = :id", $array);
+  $db->insertLogs("facturas", $_POST["id"], "Se " . $estado ." la factura {$_POST["id"]}", $usuario["id"]);
 
   $db->desconectar();
 
@@ -187,20 +190,80 @@ function buscarCliente(){
   $datos = $db->consulta("SELECT * FROM clientes WHERE estado = 1 and telefono = ".$_POST['telefono']);
 
   if ($datos["cantidad_registros"] > 0) {
-      $resp['success'] = true;
-      $resp['msj'] = $datos;
-    } else {
-      $resp['success'] = false;
-      $resp['msj'] = 'no hay datos';
-    }
+    $resp['success'] = true;
+    $resp['msj'] = $datos;
+  } else {
+    $resp['success'] = false;
+    $resp['msj'] = 'no hay datos';
+  }
+  $db->desconectar();
 
+  return json_encode($resp);
 
+}
+
+function getById(){
+  global $usuario;
+  $db = new Bd();
+  $db->conectar();
+  $resp = array();
+
+  $datos = $db->consulta("SELECT * FROM clientes WHERE id = ".$_GET['id']);
+
+  if ($datos["cantidad_registros"] > 0) {
+    $resp['success'] = true;
+    $resp['msj'] = $datos;
+  } else {
+    $resp['success'] = false;
+    $resp['msj'] = 'no hay datos';
+  }
+  $db->desconectar();
+
+  return json_encode($resp);
+}
+
+function traerProductos(){
+  $db = new Bd();
+  $db->conectar();
+  $resp = array();
+
+  $datos = $db->consulta("SELECT * FROM productos WHERE estado = 1");
+
+  if ($datos["cantidad_registros"] > 0) {
+    $resp['success'] = true;
+    $resp['msj'] = $datos;
+  } else {
+    $resp['success'] = false;
+    $resp['msj'] = 'no hay datos';
+  }
 
   $db->desconectar();
 
   return json_encode($resp);
 
 }
+
+function traerServicios(){
+  $db = new Bd();
+  $db->conectar();
+  $resp = array();
+
+  $datos = $db->consulta("SELECT * FROM servicios WHERE estado = 1");
+
+  if ($datos["cantidad_registros"] > 0) {
+    $resp['success'] = true;
+    $resp['msj'] = $datos;
+  } else {
+    $resp['success'] = false;
+    $resp['msj'] = 'no hay datos';
+  }
+
+  $db->desconectar();
+
+  return json_encode($resp);
+
+}
+
 
 if(@$_REQUEST['accion']){
   if(function_exists($_REQUEST['accion'])){
