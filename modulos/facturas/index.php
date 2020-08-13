@@ -103,6 +103,8 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="tituloModalCrear">titulo</h5>
+          <button type="button" class="btn btn-secondary m-1" data-dismiss="modal"><i class="fas fa-times"></i></button>
+
         </div>
 
         <h5 class="text-center mt-1"> Datos Cliente</h5>
@@ -112,7 +114,7 @@
           <div class="modal-body">
             <label for="telefono">Telefono <span class="text-danger">*</span></label>
             <div class="input-group form-group">
-              <input type="number" name="telefono" required class="form-control" placeholder="Escriba el telefono"  aria-describedby="button-search" onblur="buscarCliente()">
+              <input type="number" name="telefono" required class="form-control" placeholder="Escriba el telefono"  aria-describedby="button-search" >
               <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" id="btnBuscar">Buscar</button>
               </div>
@@ -126,8 +128,19 @@
               <textarea class="form-control" required name="direccion" rows="3" placeholder="Escriba una dirección"></textarea>
             </div>
             <div class="d-flex justify-content-end">
-              <button type="button" class="btn btn-secondary m-1" data-dismiss="modal"><i class="fas fa-times"></i> Cerrar</button>
-              <button id="btnCrearFactura" type="submit" class="btn btn-primary m-1"><i class="fas fa-paper-plane"></i> Crear</button>
+              <button id="btnEditarCliente" type="button" class="btn btn-primary m-1">
+                <i class="fas fa-edit"></i>
+                Editar
+              </button>
+              <button id="btnGuardarCliente" type="submit" class="btn btn-success m-1">
+                <i class="fas fa-save"></i>
+                Guardar
+              </button>
+              <button id="btnCancelarCliente" type="button" class="btn btn-secondary m-1">
+                <i class="fas fa-times"></i>
+                Cancelar
+              </button>
+
             </div>
           </div>
         </form>
@@ -224,16 +237,18 @@
 ?>
 <script>
   var cantidad_filas = 1;
-  var datosClienteEditar = {};
   $(function(){
     $('[data-toggle="tooltip"]').tooltip();
 
-    //$("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled', true);
-
+    $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled', true);
+    $("#btnEditarCliente, #btnGuardarCliente, #btnCancelarCliente").attr('hidden', true);
+    
     //Crear
     $('.btnCrearFactura').on("click", function(){
       $("#tituloModalCrear").html(`<i class="fas fa-plus"></i> Crear Factura`);
-      $('#btnCrearFactura').html(`<i class="fas fa-paper-plane"></i> Crear`);
+      /* $('#btnCrearFactura').html(`<i class="fas fa-paper-plane"></i> Crear`); */
+      resettabla();
+      $('#formClientes').trigger("reset");
       $("#modalCrearfactura").modal("show");
     });
 
@@ -243,58 +258,79 @@
 
     $(".datepicker").datepicker({ 
       dateFormat: "yy-mm-dd", 
-      /* maxDate: "-18Y",
-      changeMonth: true,
-      changeYear: true */
     });
 
-    //Editar
-    $(document).on("click", ".btnEditarFactura", function(){
-      let datos = $(this).data("datos");
 
-      $.ajax({
-        async: true,
-        url: 'acciones',
-        type: 'GET',
-        dataType: 'json',
-        data: {
-          accion: "getById",
-          id: datos['id']
-        },
-        success: function(data){
-          if(data.success){
-            console.log(datos);
-            $("#tituloModalCrear").html(`<i class="fas fa-edit"></i> Editar Factura | ${datos['id']}`);
-            // formulario fecha entrega 
-            $("#formFechaEntrega :input").removeClass("is-valid");
-            $("#formFechaEntrega :input").removeClass("is-invalid");
-            $("#formFechaEntrega :input[name='fechaEntrega']").val(moment(datos["fecha_entrega"]).locale('es').format('YYYY[-]MM[-]DD'));
+    $("#btnEditarCliente").on("click", function(){
+      $("#formClientes :input[name='accion']").val('editarCliente');
+      $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr('disabled');
+      $("#btnEditarCliente").attr('hidden', true);
+      $("#btnGuardarCliente, #btnCancelarCliente").removeAttr("hidden");
+      if($("#formClientes :input[name='accion']").val()=='editarCliente'){
+        $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Guardar`);
+      }
+    })
 
-            // formulario cliente
-            $("#formClientes :input").removeClass("is-valid");
-            $("#formClientes :input").removeClass("is-invalid");
-            $("#formClientes :input[name='id']").val(data.msj[0].id);
-            $("#formClientes :input[name='telefono']").val(data.msj[0].telefono);
-            $("#formClientes :input[name='nombre']").val(data.msj[0].nombre);
-            $("#formClientes :input[name='direccion']").val(data.msj[0].direccion);
+    $("#btnCancelarCliente").on("click", function(){
+      $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled',true);
+      $("#btnGuardarCliente, #btnCancelarCliente").attr("hidden", true);
+      if($("#formClientes :input[name='accion']").val()=='editarCliente'){
+        $("#btnEditarCliente").removeAttr('hidden');
+      }
+    });
 
-            $("#formCrearFactura :input[name='nombre']").val(datos["nombre"]);
-            $("#formCrearFactura :input[name='precio']").val(datos["precio"]);
-            $("#formCrearFactura :input[name='accion']").val('editarFactura');
-            $('#btnCrearFactura').html(`<i class="fas fa-paper-plane"></i> Editar`);
-            $("#modalCrearfactura").modal("show");
 
-            renderTabla(datos['datos_tabla']);
 
-          }
-        },
-        error: function(){
-          Swal.fire({
-            icon: 'error',
-            html: 'No se han enviado los datos'
-          })
-        }
-      });
+    $("#formClientes").submit(function(event){
+      event.preventDefault();
+      if($("#formClientes").valid()){
+        $.ajax({
+            type: "POST",
+          url: "acciones",
+          cache: false,
+          contentType: false,
+          dataType: 'json',
+          processData: false,
+          data: new FormData(this),
+          beforeSend: function(){
+            $('#formLogin :input').attr("disabled", true);
+            //Desabilitamos el botón
+            $('#btnGuardarCliente').html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> guardando...`);
+            $("#btnGuardarCliente").attr("disabled" , true);
+          },
+          success: function(data){
+            if(data.success){
+
+              Swal.fire({
+                icon: 'success',
+                html: data.msj
+              });
+              $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled',true);
+              $("#btnGuardarCliente, #btnCancelarCliente").attr("hidden", true);
+              $("#btnEditarCliente").removeAttr('hidden');
+              $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Guardar`);
+              $("#btnGuardarCliente").removeAttr("disabled");
+
+              if(data.id_creado){
+                buscarCliente(data.id_creado);
+              }
+
+            }
+          },
+          error: function(){
+            Swal.fire({
+              icon: 'error',
+              html: "Error."
+            });
+            //Habilitamos el botón
+            $('#formClientes :input').attr("disabled", false);
+            $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Guardar`);
+            $("#btnGuardarCliente").attr("hidden", false);
+            $("#btnGuardarCliente").removeAttr("disabled");
+          },
+        });
+      }
+      
     });
 
     //Cambio de estado
@@ -364,12 +400,24 @@
             $("#formClientes :input[name='telefono']").val();
             $("#formClientes :input[name='nombre']").val(data.msj[0].nombre);
             $("#formClientes :input[name='direccion']").val(data.msj[0].direccion);
-            $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled")
+            //$("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled")
+            $("#btnEditarCliente").attr('hidden', false);
           }else{
             Swal.fire({
               icon: 'info',
               html: 'No existe cliente, debe crearlo'
             })
+
+            $("#formClientes :input[name='accion']").val('crearCliente');
+            $("#formClientes :input[name='id']").val('');
+            $("#formClientes :input[name='telefono']").val();
+            $("#formClientes :input[name='nombre']").val('');
+            $("#formClientes :input[name='direccion']").val('');
+            $("#btnEditarCliente").attr('hidden', true);
+            $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled");
+            $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Crear`);
+            $('#btnGuardarCliente, #btnCancelarCliente').removeAttr("hidden");
+
           }
         },
         error: function(){
@@ -382,10 +430,6 @@
     }
   }
 
-  function getClientById(id){
-    datosClienteEditar = {};
-    
-  }
 
   function lista(){
 
@@ -426,7 +470,6 @@
         {
           "render": function (nTd, sData, oData, iRow, iCol) {
             return `<div class="d-flex justify-content-center">
-                      <button type="button" class="btn btn-primary btn-sm mx-1 btnEditarFactura" data-toggle="tooltip" title="Editar" data-datos='${JSON.stringify(oData)}'><i class="fas fa-edit"></i></button>
                       <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
                     </div>`;
           }
@@ -502,8 +545,7 @@
     });
   }
 
-  function traerProductos(i=null){
-    console.log(i);
+  function traerProductos(){
     $.ajax({
           url: 'acciones',
           type: 'GET',
@@ -513,7 +555,7 @@
           },
           success: function(data){
             if(data.success){
-              const cond = i ? i : cantidad_filas;
+              const cond =  cantidad_filas;
               for (let i = 0; i < data.msj.cantidad_registros; i++) {
                 $(`#producto${cantidad_filas - 1}`).append(`
                   <option value="${data.msj[i].id}">${data.msj[i].nombre}</option>
@@ -531,7 +573,7 @@
 
   }
 
-  function traerServicios(i=null){
+  function traerServicios(){
     $.ajax({
           url: 'acciones',
           type: 'GET',
@@ -541,7 +583,7 @@
           },
           success: function(data){
             if(data.success){
-              const cond = i ? i : cantidad_filas;
+              const cond = cantidad_filas;
               for (let i = 0; i < data.msj.cantidad_registros; i++) {
                 $(`#servicio${cantidad_filas - 1}`).append(`
                   <option value="${data.msj[i].id}">${data.msj[i].nombre}</option>
@@ -607,6 +649,7 @@
         },
         success: function(data){
           if (data.success) {
+            $("#tabla").DataTable().ajax.reload();
             $("#formFechaEntrega :input").removeClass("is-valid");
             $("#formClientes :input").removeClass("is-valid");
             $("#formFechaEntrega :input").removeClass("is-invalid");
@@ -636,45 +679,37 @@
 
         },
         complete: function(){
-
         }
     });
   }
 
-  function renderTabla(datos){
-    const array = JSON.parse(datos);
+  function resettabla(){
     $("#body_tabla").empty();
-    for(let i = 0; i< array.length ; i++){
+    $('#tabla_factura').append('<tr id="addr0"></tr>');
 
-      let fila = `
+    $('#addr0').html(`
       <td>
-        <select class="custom-select" required name='producto${i}' id="producto${i}">
+        <select class="custom-select" required name='producto0' id="producto0">
           <option value='0' disabled selected >Seleccione un opción</option>
         </select>
       </td>
       <td>
-        <select class="custom-select" required name='servicio${i}' id="servicio${i}">
+        <select class="custom-select" required name='servicio0' id="servicio0">
           <option value='0' disabled selected >Seleccione un opción</option>
         </select>
       </td>
       <td>
-        <input required name='cantidad${i}' type='text' placeholder='Cantidad'  class='form-control' id='cantidad${i}' >
+        <input required name='cantidad0' type='text' placeholder='Cantidad'  class='form-control' id='cantidad0' >
       </td>
       <td>
-        <input required name='precio${i}'  id='precio${i}' type='text' placeholder='Precio'  class='form-control' onblur="calcularTotal()">
-      </td>`;
-      
-      $('#tabla_factura').append('<tr id="addr'+(i)+'"></tr>');
-      $('#addr'+i).html(fila);
-      // seteo valores
-      console.log(array[i].producto);
-      $("#producto"+i).val(array[i].producto);
-      $("#servicio"+i).val(array[i].servicio);
-      $("#cantidad"+i).val(array[i].cantidad);
-      $("#precio"+i).val(array[i].precio);
-      cantidad_filas = i;
+        <input required name='precio0'  id='precio0' type='text' placeholder='Precio'  class='form-control' onblur="calcularTotal()">
+      </td>`
+    );
+    traerProductos();
+    traerServicios();
+    $('#tabla_factura').append('<tr id="addr1"></tr>');
+    cantidad_filas = 1;
 
-    }
   }
 
 

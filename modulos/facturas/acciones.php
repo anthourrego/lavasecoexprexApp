@@ -264,6 +264,63 @@ function traerServicios(){
 
 }
 
+function editarCliente(){
+  global $usuario;
+  $db = new Bd();
+  $resp = array();
+  $db->conectar();
+
+  $datos = array(
+    ":id" => $_POST["id"],
+    ":nombre" => $_POST["nombre"],
+    ":telefono" => $_POST["telefono"],
+    ":direccion" => $_POST["direccion"]
+  );
+
+  $db->sentencia("UPDATE clientes SET nombre = :nombre, telefono = :telefono, direccion = :direccion WHERE id = :id", $datos);
+  $db->insertLogs("clientes", $_POST["id"], "Se edita el cliente {$_POST['nombre']}", $usuario["id"]);
+
+  $resp["success"] = true;
+  $resp["msj"] = "Cliente Editado";
+
+  $db->desconectar();
+  return json_encode($resp);
+
+}
+
+function crearCliente(){
+   $db = new Bd();
+  $db->conectar();
+  $resp = array();
+  global $usuario;
+
+
+  $datos = array(
+    ":nombre" => $_POST["nombre"],
+    ":telefono" => $_POST["telefono"], 
+    ":direccion" => $_POST["direccion"], 
+    ":fecha_creacion" => date("Y-m-d H:i:s"), 
+    ":fk_creador" => $usuario["id"],
+    ":estado" => 1 
+  );
+  $id_cliente = $db->sentencia("INSERT INTO clientes (nombre, telefono, direccion, fecha_creacion, fk_creador, estado) VALUES (:nombre, :telefono, :direccion, :fecha_creacion, :fk_creador, :estado)", $datos);
+
+  if ($id_cliente > 0) {
+    $db->insertLogs("clientes", $id_cliente, " cliente creado   {$_POST['nombre']}", $usuario["id"]);
+    $resp['success'] = true;
+    $resp['msj'] = 'Cliente Creado';
+    $resp['id_creado'] = $id_cliente;
+  } else {
+    $resp['success'] = false;
+    $resp['msj'] = 'Error al realizar el registro';
+  }
+  
+
+  $db->desconectar();
+
+  return json_encode($resp);
+}
+
 
 if(@$_REQUEST['accion']){
   if(function_exists($_REQUEST['accion'])){
