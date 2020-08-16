@@ -99,7 +99,7 @@
 
   <!-- Modal Crear Producto -->
   <div class="modal fade" id="modalCrearfactura" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="tituloModalCrear">titulo</h5>
@@ -107,14 +107,14 @@
 
         </div>
 
-        <h5 class="text-center mt-1"> Datos Cliente</h5>
+        <h5 class="text-left mt-1 p-2"> Datos Cliente</h5>
         <form id="formClientes">
           <input type="hidden" name="accion" value="crearCliente">
           <input type="hidden" required name="id" value="">
           <div class="modal-body">
             <label for="telefono">Telefono <span class="text-danger">*</span></label>
             <div class="input-group form-group">
-              <input type="number" name="telefono" required class="form-control" placeholder="Escriba el telefono"  aria-describedby="button-search" >
+              <input type="number" name="telefono" required class="form-control" placeholder="Escriba el telefono"  aria-describedby="button-search" onblur="buscarCliente()" >
               <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" id="btnBuscar">Buscar</button>
               </div>
@@ -146,7 +146,7 @@
         </form>
 
 
-        <h5 class="text-center mt-1"> Datos Factura</h5>
+        <h5 class="text-left mt-1 p-2"> Datos Factura</h5>
         <div class="col-6">
           
         </div>
@@ -236,11 +236,12 @@
   echo $lib->cambioPantalla();
 ?>
 <script>
-  var cantidad_filas = 1;
+  let cantidad_filas = 1;
+  let precios = {};
   $(function(){
     $('[data-toggle="tooltip"]').tooltip();
 
-    $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled', true);
+    /* $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled', true);*/
     $("#btnEditarCliente, #btnGuardarCliente, #btnCancelarCliente").attr('hidden', true);
     
     //Crear
@@ -272,11 +273,10 @@
     })
 
     $("#btnCancelarCliente").on("click", function(){
-      $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled',true);
-      $("#btnGuardarCliente, #btnCancelarCliente").attr("hidden", true);
-      if($("#formClientes :input[name='accion']").val()=='editarCliente'){
-        $("#btnEditarCliente").removeAttr('hidden');
-      }
+      $("#formClientes :input[name='accion']").val('crearCliente');
+      //$("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled',true);
+      $("#btnEditarCliente,#btnGuardarCliente, #btnCancelarCliente").attr("hidden", true);
+      $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion'], #formClientes :input[name='telefono']").val('');
     });
 
 
@@ -348,9 +348,10 @@
     });
     
     $("#add_row").click(function(){
+     
       $('#addr'+cantidad_filas).html(`
         <td>
-          <select class="custom-select" required name='producto${cantidad_filas}' id="producto${cantidad_filas}">
+          <select class="custom-select" required name='producto${cantidad_filas}' id="producto${cantidad_filas}" onchange="seleccionar(this)">
             <option value='0' disabled selected >Seleccione un opción</option>
           </select>
         </td>
@@ -360,12 +361,13 @@
           </select>
         </td>
         <td>
-          <input required name='cantidad${cantidad_filas}' type='text' placeholder='Cantidad'  class='form-control' id='cantidad${cantidad_filas}' >
+          <input required name='cantidad${cantidad_filas}' type='number' placeholder='Cantidad'  class='form-control' id='cantidad${cantidad_filas}' onchange="seleccionar(this)" >
         </td>
         <td>
           <input required name='precio${cantidad_filas}'  id='precio${cantidad_filas}' type='text' placeholder='Precio'  class='form-control' onblur="calcularTotal()">
         </td>`
       );
+      $('#cantidad'+cantidad_filas).val(1);
       $('#tabla_factura').append('<tr id="addr'+(cantidad_filas+1)+'"></tr>');
       cantidad_filas++;
       calcularTotal();
@@ -385,49 +387,51 @@
   });
 
   function buscarCliente(){
-    if($("#formClientes :input[name='telefono']").val()){
-      $.ajax({
-        url: 'acciones',
-        type: 'POST',
-        dataType: 'json',
-        data: {
-          accion: "buscarCliente", 
-          telefono: $("#formClientes :input[name='telefono']").val()
-        },
-        success: function(data){
-          if(data.success){
-            $("#formClientes :input[name='id']").val(data.msj[0].id);
-            $("#formClientes :input[name='telefono']").val();
-            $("#formClientes :input[name='nombre']").val(data.msj[0].nombre);
-            $("#formClientes :input[name='direccion']").val(data.msj[0].direccion);
-            //$("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled")
-            $("#btnEditarCliente").attr('hidden', false);
-          }else{
+    if($("#formClientes :input[name='accion']").val() != 'editarCliente'){
+      if($("#formClientes :input[name='telefono']").val()){
+        $.ajax({
+          url: 'acciones',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            accion: "buscarCliente", 
+            telefono: $("#formClientes :input[name='telefono']").val()
+          },
+          success: function(data){
+            if(data.success){
+              $("#formClientes :input[name='id']").val(data.msj[0].id);
+              $("#formClientes :input[name='telefono']").val();
+              $("#formClientes :input[name='nombre']").val(data.msj[0].nombre);
+              $("#formClientes :input[name='direccion']").val(data.msj[0].direccion);
+              //$("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled")
+              $("#btnEditarCliente").attr('hidden', false);
+              $("#btnCancelarCliente").attr('hidden', false);
+            }else{
+              
+              $("#formClientes :input[name='accion']").val('crearCliente');
+              $("#formClientes :input[name='id']").val('');
+              $("#formClientes :input[name='telefono']").val();
+              $("#formClientes :input[name='nombre']").val('');
+              $("#formClientes :input[name='direccion']").val('');
+              $("#btnEditarCliente").attr('hidden', true);
+              $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled");
+              $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Crear`);
+              $('#btnGuardarCliente, #btnCancelarCliente').removeAttr("hidden");
+
+            }
+          },
+          error: function(){
             Swal.fire({
-              icon: 'info',
-              html: 'No existe cliente, debe crearlo'
+              icon: 'error',
+              html: 'No se han enviado los datos'
             })
-
-            $("#formClientes :input[name='accion']").val('crearCliente');
-            $("#formClientes :input[name='id']").val('');
-            $("#formClientes :input[name='telefono']").val();
-            $("#formClientes :input[name='nombre']").val('');
-            $("#formClientes :input[name='direccion']").val('');
-            $("#btnEditarCliente").attr('hidden', true);
-            $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled");
-            $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Crear`);
-            $('#btnGuardarCliente, #btnCancelarCliente').removeAttr("hidden");
-
           }
-        },
-        error: function(){
-          Swal.fire({
-            icon: 'error',
-            html: 'No se han enviado los datos'
-          })
-        }
-      });
+        });
+      }
+    }else{
+      console.log('no ni mergas');
     }
+    
   }
 
 
@@ -554,6 +558,13 @@
             accion: "traerProductos", 
           },
           success: function(data){
+            // si no hay precios guardados, se setea el objeto de precios
+            if(!Object.keys(precios).length){
+              for (let i = 0; i < data.msj.cantidad_registros; i++) {
+                precios[data.msj[i].id] = data.msj[i].precio;
+              }
+            }
+
             if(data.success){
               const cond =  cantidad_filas;
               for (let i = 0; i < data.msj.cantidad_registros; i++) {
@@ -573,6 +584,7 @@
 
   }
 
+
   function traerServicios(){
     $.ajax({
           url: 'acciones',
@@ -586,12 +598,10 @@
               const cond = cantidad_filas;
               for (let i = 0; i < data.msj.cantidad_registros; i++) {
                 $(`#servicio${cantidad_filas - 1}`).append(`
-                  <option value="${data.msj[i].id}">${data.msj[i].nombre}</option>
+                  <option value="${data.msj[i].id}" ${data.msj[i].id == 3 ? 'selected' : '' }>${data.msj[i].nombre}</option>
                 `);
               }
             }
-
-
           },
           error: function(){
             Swal.fire({
@@ -689,7 +699,7 @@
 
     $('#addr0').html(`
       <td>
-        <select class="custom-select" required name='producto0' id="producto0">
+        <select class="custom-select" required name='producto0' id="producto0" onchange="seleccionar(this)">
           <option value='0' disabled selected >Seleccione un opción</option>
         </select>
       </td>
@@ -699,18 +709,32 @@
         </select>
       </td>
       <td>
-        <input required name='cantidad0' type='text' placeholder='Cantidad'  class='form-control' id='cantidad0' >
+        <input required name='cantidad0' type='number' placeholder='Cantidad'  class='form-control' id='cantidad0' onchange="seleccionar(this)">
       </td>
       <td>
         <input required name='precio0'  id='precio0' type='text' placeholder='Precio'  class='form-control' onblur="calcularTotal()">
       </td>`
     );
+    $('#cantidad0').val(1);
     traerProductos();
     traerServicios();
     $('#tabla_factura').append('<tr id="addr1"></tr>');
     cantidad_filas = 1;
 
   }
+
+  function seleccionar(elemento, tipo){
+    const numeroId = elemento.id[elemento.id.length - 1];
+    const producto = $('#producto'+numeroId).val();
+    const cantidad = $('#cantidad'+numeroId).val();
+    if(producto && cantidad){
+      const precioTmp = parseInt(precios[producto]) * parseInt(cantidad);
+      $('#precio'+numeroId).val(precioTmp);
+      calcularTotal();
+    }
+
+  }
+
 
 
 </script>
