@@ -127,7 +127,7 @@
               <label for="direccion">Dirección <span class="text-danger">*</span></label>
               <textarea class="form-control" required name="direccion" rows="3" placeholder="Escriba una dirección"></textarea>
             </div>
-            <div class="d-flex justify-content-end">
+            <!-- <div class="d-flex justify-content-end">
               <button id="btnEditarCliente" type="button" class="btn btn-primary m-1">
                 <i class="fas fa-edit"></i>
                 Editar
@@ -140,8 +140,7 @@
                 <i class="fas fa-times"></i>
                 Cancelar
               </button>
-
-            </div>
+            </div> -->
           </div>
         </form>
 
@@ -158,7 +157,6 @@
             </div>
           </form>
 
-          
           <div class="col-md-12 column">
             
             <table class="table table-bordered table-hover" id="tabla_factura">
@@ -241,8 +239,6 @@
   $(function(){
     $('[data-toggle="tooltip"]').tooltip();
 
-    /* $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled', true);*/
-    $("#btnEditarCliente, #btnGuardarCliente, #btnCancelarCliente").attr('hidden', true);
     
     //Crear
     $('.btnCrearFactura').on("click", function(){
@@ -262,30 +258,13 @@
     });
 
 
-    $("#btnEditarCliente").on("click", function(){
-      $("#formClientes :input[name='accion']").val('editarCliente');
-      $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr('disabled');
-      $("#btnEditarCliente").attr('hidden', true);
-      $("#btnGuardarCliente, #btnCancelarCliente").removeAttr("hidden");
-      if($("#formClientes :input[name='accion']").val()=='editarCliente'){
-        $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Guardar`);
-      }
-    })
-
-    $("#btnCancelarCliente").on("click", function(){
-      $("#formClientes :input[name='accion']").val('crearCliente');
-      //$("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled',true);
-      $("#btnEditarCliente,#btnGuardarCliente, #btnCancelarCliente").attr("hidden", true);
-      $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion'], #formClientes :input[name='telefono']").val('');
-    });
-
 
 
     $("#formClientes").submit(function(event){
       event.preventDefault();
       if($("#formClientes").valid()){
         $.ajax({
-            type: "POST",
+          type: "POST",
           url: "acciones",
           cache: false,
           contentType: false,
@@ -305,16 +284,9 @@
                 icon: 'success',
                 html: data.msj
               });
-              $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").attr('disabled',true);
-              $("#btnGuardarCliente, #btnCancelarCliente").attr("hidden", true);
-              $("#btnEditarCliente").removeAttr('hidden');
-              $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Guardar`);
-              $("#btnGuardarCliente").removeAttr("disabled");
-
               if(data.id_creado){
                 buscarCliente(data.id_creado);
               }
-
             }
           },
           error: function(){
@@ -324,9 +296,6 @@
             });
             //Habilitamos el botón
             $('#formClientes :input').attr("disabled", false);
-            $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Guardar`);
-            $("#btnGuardarCliente").attr("hidden", false);
-            $("#btnGuardarCliente").removeAttr("disabled");
           },
         });
       }
@@ -387,51 +356,42 @@
   });
 
   function buscarCliente(){
-    if($("#formClientes :input[name='accion']").val() != 'editarCliente'){
-      if($("#formClientes :input[name='telefono']").val()){
-        $.ajax({
-          url: 'acciones',
-          type: 'POST',
-          dataType: 'json',
-          data: {
-            accion: "buscarCliente", 
-            telefono: $("#formClientes :input[name='telefono']").val()
-          },
-          success: function(data){
-            if(data.success){
-              $("#formClientes :input[name='id']").val(data.msj[0].id);
-              $("#formClientes :input[name='telefono']").val();
-              $("#formClientes :input[name='nombre']").val(data.msj[0].nombre);
-              $("#formClientes :input[name='direccion']").val(data.msj[0].direccion);
-              //$("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled")
-              $("#btnEditarCliente").attr('hidden', false);
-              $("#btnCancelarCliente").attr('hidden', false);
-            }else{
-              
-              $("#formClientes :input[name='accion']").val('crearCliente');
-              $("#formClientes :input[name='id']").val('');
-              $("#formClientes :input[name='telefono']").val();
-              $("#formClientes :input[name='nombre']").val('');
-              $("#formClientes :input[name='direccion']").val('');
-              $("#btnEditarCliente").attr('hidden', true);
-              $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled");
-              $('#btnGuardarCliente').html(`<i class="fas fa-save"></i> Crear`);
-              $('#btnGuardarCliente, #btnCancelarCliente').removeAttr("hidden");
+    if($("#formClientes :input[name='telefono']").val()){
+      $.ajax({
+        url: 'acciones',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          accion: "buscarCliente", 
+          telefono: $("#formClientes :input[name='telefono']").val()
+        },
+        success: function(data){
+          if(data.success){
+            $("#formClientes :input[name='accion']").val('editarCliente');
+            $("#formClientes :input[name='id']").val(data.msj[0].id);
+            $("#formClientes :input[name='telefono']").val();
+            $("#formClientes :input[name='nombre']").val(data.msj[0].nombre);
+            $("#formClientes :input[name='direccion']").val(data.msj[0].direccion);
+            //$("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled")
 
-            }
-          },
-          error: function(){
-            Swal.fire({
-              icon: 'error',
-              html: 'No se han enviado los datos'
-            })
+          }else{
+            $("#formClientes :input[name='accion']").val('crearCliente');
+            $("#formClientes :input[name='id']").val('');
+            $("#formClientes :input[name='telefono']").val();
+            $("#formClientes :input[name='nombre']").val('');
+            $("#formClientes :input[name='direccion']").val('');
+            $("#formClientes :input[name='nombre'], #formClientes :input[name='direccion']").removeAttr("disabled");
+
           }
-        });
-      }
-    }else{
-      console.log('no ni mergas');
+        },
+        error: function(){
+          Swal.fire({
+            icon: 'error',
+            html: 'No se han enviado los datos'
+          })
+        }
+      });
     }
-    
   }
 
 
@@ -474,8 +434,8 @@
         {
           "render": function (nTd, sData, oData, iRow, iCol) {
             return `<div class="d-flex justify-content-center">
-                      <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
-                    </div>`;
+              <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
+            </div>`;
           }
         }
       ],
@@ -551,65 +511,65 @@
 
   function traerProductos(){
     $.ajax({
-          url: 'acciones',
-          type: 'GET',
-          dataType: 'json',
-          data: {
-            accion: "traerProductos", 
-          },
-          success: function(data){
-            // si no hay precios guardados, se setea el objeto de precios
-            if(!Object.keys(precios).length){
-              for (let i = 0; i < data.msj.cantidad_registros; i++) {
-                precios[data.msj[i].id] = data.msj[i].precio;
-              }
-            }
-
-            if(data.success){
-              const cond =  cantidad_filas;
-              for (let i = 0; i < data.msj.cantidad_registros; i++) {
-                $(`#producto${cantidad_filas - 1}`).append(`
-                  <option value="${data.msj[i].id}">${data.msj[i].nombre}</option>
-                `);
-              }
-            }
-          },
-          error: function(){
-            Swal.fire({
-              icon: 'error',
-              html: 'No se han enviado los datos'
-            })
+      url: 'acciones',
+      type: 'GET',
+      dataType: 'json',
+      data: {
+        accion: "traerProductos", 
+      },
+      success: function(data){
+        // si no hay precios guardados, se setea el objeto de precios
+        if(!Object.keys(precios).length){
+          for (let i = 0; i < data.msj.cantidad_registros; i++) {
+            precios[data.msj[i].id] = data.msj[i].precio;
           }
-        });
+        }
+
+        if(data.success){
+          const cond =  cantidad_filas;
+          for (let i = 0; i < data.msj.cantidad_registros; i++) {
+            $(`#producto${cantidad_filas - 1}`).append(`
+              <option value="${data.msj[i].id}">${data.msj[i].nombre}</option>
+            `);
+          }
+        }
+      },
+      error: function(){
+        Swal.fire({
+          icon: 'error',
+          html: 'No se han enviado los datos'
+        })
+      }
+    });
 
   }
 
 
   function traerServicios(){
     $.ajax({
-          url: 'acciones',
-          type: 'GET',
-          dataType: 'json',
-          data: {
-            accion: "traerServicios", 
-          },
-          success: function(data){
-            if(data.success){
-              const cond = cantidad_filas;
-              for (let i = 0; i < data.msj.cantidad_registros; i++) {
-                $(`#servicio${cantidad_filas - 1}`).append(`
-                  <option value="${data.msj[i].id}" ${data.msj[i].id == 3 ? 'selected' : '' }>${data.msj[i].nombre}</option>
-                `);
-              }
-            }
-          },
-          error: function(){
-            Swal.fire({
-              icon: 'error',
-              html: 'No se han enviado los datos'
-            })
+      url: 'acciones',
+      type: 'GET',
+      dataType: 'json',
+      data: {
+        accion: "traerServicios", 
+      },
+      success: function(data){
+        if(data.success){
+          const cond = cantidad_filas;
+          for (let i = 0; i < data.msj.cantidad_registros; i++) {
+            $(`#servicio${cantidad_filas - 1}`).append(`
+              <option value="${data.msj[i].id}" ${data.msj[i].id == 3 ? 'selected' : '' }>${data.msj[i].nombre}</option>
+            `);
           }
-        });
+        }
+      },
+      error: function(){
+        Swal.fire({
+          icon: 'error',
+          html: 'No se han enviado los datos'
+        })
+      }
+    });
 
   }
 
@@ -641,62 +601,61 @@
   }
 
   function facturar(){
-
+    $("#formClientes").submit();
     $.ajax({
-        url: 'acciones',
-        type: 'POST',
-        dataType: 'json',
-        data: {
-          accion: 'facturar',
-          datosTabla: tablaJson(),
-          idCliente: $("#formClientes :input[name='id']").val(),
-          total: $("#total_input").val(),
-          abono: $("#abono_input").val(),
-          fechaEntrega: $("#formFechaEntrega :input[name='fechaEntrega']").val()
-        },
-        beforeSend: function(){
+      url: 'acciones',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        accion: 'facturar',
+        datosTabla: tablaJson(),
+        idCliente: $("#formClientes :input[name='id']").val(),
+        total: $("#total_input").val(),
+        abono: $("#abono_input").val(),
+        fechaEntrega: $("#formFechaEntrega :input[name='fechaEntrega']").val()
+      },
+      beforeSend: function(){
 
-        },
-        success: function(data){
-          if (data.success) {
-            $("#tabla").DataTable().ajax.reload();
-            $("#formFechaEntrega :input").removeClass("is-valid");
-            $("#formClientes :input").removeClass("is-valid");
-            $("#formFechaEntrega :input").removeClass("is-invalid");
-            $("#formFechaEntrega :input").removeClass("is-invalid");
-            $("#modalCrearfactura").modal("hide");
-            Swal.fire({
-              toast: true,
-              position: 'bottom-end',
-              icon: 'success',
-              title: data.msj,
-              showConfirmButton: false,
-              timer: 5000
-            });
-          }else{
-            Swal.fire({
-              icon: 'warning',
-              html: data.msj
-            })
-          }
-        },
-        error: function(){
-          //Habilitamos el botón
+      },
+      success: function(data){
+        if (data.success) {
+          $("#tabla").DataTable().ajax.reload();
+          $("#formFechaEntrega :input").removeClass("is-valid");
+          $("#formClientes :input").removeClass("is-valid");
+          $("#formFechaEntrega :input").removeClass("is-invalid");
+          $("#formFechaEntrega :input").removeClass("is-invalid");
+          $("#modalCrearfactura").modal("hide");
           Swal.fire({
-            icon: 'error',
-            html: 'Error al registrar.'
+            toast: true,
+            position: 'bottom-end',
+            icon: 'success',
+            title: data.msj,
+            showConfirmButton: false,
+            timer: 5000
           });
-
-        },
-        complete: function(){
+        }else{
+          Swal.fire({
+            icon: 'warning',
+            html: data.msj
+          })
         }
+      },
+      error: function(){
+        //Habilitamos el botón
+        Swal.fire({
+          icon: 'error',
+          html: 'Error al registrar.'
+        });
+
+      },
+      complete: function(){
+      }
     });
   }
 
   function resettabla(){
     $("#body_tabla").empty();
     $('#tabla_factura').append('<tr id="addr0"></tr>');
-
     $('#addr0').html(`
       <td>
         <select class="custom-select" required name='producto0' id="producto0" onchange="seleccionar(this)">
@@ -732,10 +691,6 @@
       $('#precio'+numeroId).val(precioTmp);
       calcularTotal();
     }
-
-  }
-
-
-
+  }  
 </script>
 </html>
