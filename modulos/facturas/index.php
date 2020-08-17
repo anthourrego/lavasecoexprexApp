@@ -432,7 +432,7 @@
         { data: "total" },
         {
           "render": function (nTd, sData, oData, iRow, iCol) {
-            return `<div class="d-flex justify-content-center">
+            return estado == 2 ? '' : `<div class="d-flex justify-content-center">
               <button type="button" class="btn btn-sm btn-success mx-1" onClick='pagar(${JSON.stringify(oData)})' data-toggle="tooltip" title="Pagar"><i class="far fa-money-bill-alt"></i></button>
               <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
             </div>`;
