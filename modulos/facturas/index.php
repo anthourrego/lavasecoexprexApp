@@ -237,6 +237,7 @@
 <script>
   let cantidad_filas = 1;
   let precios = {};
+  let estado = '';
   $(function(){
     $('[data-toggle="tooltip"]').tooltip();
 
@@ -305,6 +306,7 @@
     $("#selectEstado").change(function () {
       $('#tabla').dataTable().fnDestroy();
       lista();
+     
     });
 
     $("#btnfacturar").click(function(){
@@ -393,10 +395,9 @@
     }
   }
 
-
   function lista(){
 
-    var estado = $("#selectEstado").val();
+    estado = $("#selectEstado").val();
 
     $("#tabla").DataTable({
       stateSave: true,
@@ -432,10 +433,20 @@
         { data: "total" },
         {
           "render": function (nTd, sData, oData, iRow, iCol) {
-            return estado == 2 ? '' : `<div class="d-flex justify-content-center">
-              <button type="button" class="btn btn-sm btn-success mx-1" onClick='pagar(${JSON.stringify(oData)})' data-toggle="tooltip" title="Pagar"><i class="far fa-money-bill-alt"></i></button>
-              <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
-            </div>`;
+
+            if(estado == 0){
+              return `<div class="d-flex justify-content-center">
+                <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
+              </div>`
+            }else if( estado == 1){
+              return  `<div class="d-flex justify-content-center">
+                <button type="button" class="btn btn-sm btn-success mx-1" onClick='pagar(${JSON.stringify(oData)})' data-toggle="tooltip" title="Pagar"><i class="far fa-money-bill-alt"></i></button>
+                <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
+              </div>`;
+            }else{
+              return '';
+            }
+
           }
         }
       ],
