@@ -112,12 +112,32 @@ function cambiarEstado(){
   $db = new Bd();
   $db->conectar();
   
-  $estado = $_POST["estado"] == 1 ? 'inhabilita' : 'habilita';
+
+  $estado = '';
+
+  switch ( $_POST["estado"]) {
+    case 0:
+      $estado = 'habilita';
+      break;
+    case 1:
+      $estado = 'inhabilita';
+      break;
+    case 2:
+      $estado = 'paga';
+      break;
+  }
+  
+
 
   $array = array(
     ":id" => $_POST["id"],
     ":estado" => ($_POST["estado"] == 1 ? 0 : 1),
   );
+
+  if($_POST["estado"] == 2){
+    $array[':estado'] = 2;
+  }
+
 
   $db->sentencia("UPDATE facturas SET estado = :estado WHERE id = :id", $array);
   $db->insertLogs("facturas", $_POST["id"], "Se " . $estado ." la factura {$_POST["id"]}", $usuario["id"]);

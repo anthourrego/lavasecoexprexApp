@@ -68,6 +68,7 @@
               <select class="custom-select" id="selectEstado" name="status">
                 <option value="1" selected>Activo</option>
                 <option value="0">Inactivo</option>
+                <option value="2">Pagado</option>
               </select>
               <div class="input-group-append">
                 <label class="input-group-text" for="inputGroupSelect02">Estado</label>
@@ -258,8 +259,6 @@
     });
 
 
-
-
     $("#formClientes").submit(function(event){
       event.preventDefault();
       if($("#formClientes").valid()){
@@ -434,6 +433,7 @@
         {
           "render": function (nTd, sData, oData, iRow, iCol) {
             return `<div class="d-flex justify-content-center">
+              <button type="button" class="btn btn-sm btn-success mx-1" onClick='pagar(${JSON.stringify(oData)})' data-toggle="tooltip" title="Pagar"><i class="far fa-money-bill-alt"></i></button>
               <button type="button" class="btn ${estado == 1 ? 'btn-danger' : 'btn-success'} btn-sm mx-1" onClick='cambiarEstado(${JSON.stringify(oData)})' data-toggle="tooltip" title="${estado == 1 ? 'Inactivar' : 'Activar'}"><i class="fas ${estado == 1 ? 'fa-trash-alt' : 'fa-check'}"></i></button>
             </div>`;
           }
@@ -508,6 +508,57 @@
       }
     });
   }
+
+  function pagar(datos){
+    datos['estado'] = 2;
+    Swal.fire({
+      title: `¿Estas seguro de pagar La factura ${datos['id']} ?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '<i class="fas fa-check"></i> Si',
+      cancelButtonText: '<i class="fa fa-times"></i> No'
+    }).then((result) => {
+      if (result.value) {
+        $.ajax({
+          url: 'acciones',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            accion: "cambiarEstado",
+            id: datos['id'],
+            estado: datos['estado'],
+          },
+          success: function(data){
+            if (data == 1) {
+              $("#tabla").DataTable().ajax.reload();
+              Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: 'success',
+                title: `Se ha ${datos['estado'] == 1 ? 'inhabilitado' : 'habilitado'} La factura ${datos['id']}`,
+                showConfirmButton: false,
+                timer: 5000
+              });
+            }else{
+              Swal.fire({
+                icon: 'warning',
+                html: `Error al ${datos['estado'] == 1 ? 'inhabilitar' : 'habilitar'} la factura ${datos['id']}`
+              })
+            }
+          },
+          error: function(){
+            Swal.fire({
+              icon: 'error',
+              html: 'No se han enviado los datos'
+            })
+          }
+        });
+      }
+    });
+  }
+
 
   function traerProductos(){
     $.ajax({
