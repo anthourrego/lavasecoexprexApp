@@ -1,3 +1,13 @@
+@font-face {
+  font-family: "fuente-ciaf";
+  src: url("../../assets/fuentes/ethnocentric.ttf");
+}
+
+@font-face {
+  font-family: "fuente-slogan";
+  src: url("../../assets/fuentes/myriad-pro-condense.ttf");
+}
+
 body{
   background-color: #f4f6f9 !important;
 }
