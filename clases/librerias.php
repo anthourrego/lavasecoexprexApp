@@ -32,7 +32,7 @@
     }
 
     public function iconoPag(){
-      $this->cadena_libreria = '<link rel="shortcut icon" href="' . $this->ruta_iconos . 'favicon.ico">';
+      $this->cadena_libreria = '<link rel="shortcut icon" href="' . $this->ruta_iconos . 'favicon-32x32.png">';
       return($this->cadena_libreria);
     }
 

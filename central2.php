@@ -41,67 +41,84 @@
 </head>
 <body class="hold-transition sidebar-mini layout-fixed sidebar-collapse">
   <!-- Navbar -->
-  <nav class="main-header navbar navbar-expand navbar-white navbar-light d-block d-lg-none">
+  <nav class="navbar navbar-expand navbar-dark navbar-light" style="background-color: #222e3c">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li> -->
+      <a class="navbar-brand" href="#">
+        <img src="<?php echo($ruta_raiz); ?>assets/img/i_ciafi.png" width="30" height="30" class="d-inline-block align-top" alt="">
+        S.English
+      </a>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="modulos/usuarios/" data-modulopadre="0" data-modulo="Usuarios" target="object-contenido" class="nav-link"><i class="nav-icon fas fa-users"></i> Usuarios</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="modulos/modulos/" data-modulopadre="0" data-modulo="Modulos" target="object-contenido" class="nav-link"><i class="nav-icon fab fa-modx"></i> Modulos</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="modulos/productos/" data-modulopadre="0" data-modulo="Productos" target="object-contenido" class="nav-link">Productos</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="modulos/gastos" data-modulopadre="0" data-modulo="Gastos" target="object-contenido" class="nav-link">Gastos</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="modulos/clientes" data-modulopadre="0" data-modulo="Clientes" target="object-contenido" class="nav-link">Clientes</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a id="dropdownSubMenu1" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="nav-link dropdown-toggle">Modulos</a>
+        <ul aria-labelledby="dropdownSubMenu1" class="dropdown-menu border-0 shadow" style="left: 0px; right: inherit;">
+          <li><a href="#" class="dropdown-item">Some action </a></li>
+          <li><a href="#" class="dropdown-item">Some other action</a></li>
+
+          <li class="dropdown-divider"></li>
+
+          <!-- Level two dropdown-->
+          <li class="dropdown-submenu dropdown-hover">
+            <a id="dropdownSubMenu2" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">Hover for action</a>
+            <ul aria-labelledby="dropdownSubMenu2" class="dropdown-menu border-0 shadow">
+              <li>
+                <a tabindex="-1" href="#" class="dropdown-item">level 2</a>
+              </li>
+
+              <!-- Level three dropdown-->
+              <li class="dropdown-submenu">
+                <a id="dropdownSubMenu3" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="dropdown-item dropdown-toggle">level 2</a>
+                <ul aria-labelledby="dropdownSubMenu3" class="dropdown-menu border-0 shadow">
+                  <li><a href="#" class="dropdown-item">3rd level</a></li>
+                  <li><a href="#" class="dropdown-item">3rd level</a></li>
+                </ul>
+              </li>
+              <!-- End Level three -->
+
+              <li><a href="#" class="dropdown-item">level 2</a></li>
+              <li><a href="#" class="dropdown-item">level 2</a></li>
+            </ul>
+          </li>
+          <!-- End Level two -->
+        </ul>
+      </li>
+    </ul>
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <img width="30px" src="<?php echo($ruta_raiz); ?>assets/img/usuario.png"); ?>
+        </a>  
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+          <span class="dropdown-item-text text-center"><?php echo($usuario["usuario"]); ?></span>
+          <a class="dropdown-item modal-link" href="<?php echo RUTA_RAIZ ?>modulos/usuarios/editar_perfil" target="object-contenido"><i class="fas fa-user-edit"></i> Perfil</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="javascript:cerrarSesion();"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </div>
       </li>
     </ul>
   </nav>
   <!-- /.navbar -->
   <!-- Main Sidebar Container -->
-  <aside class="main-sidebar sidebar-dark-info elevation-4">
-    <!-- Brand Logo -->
-    <div class="d-flex justify-content-between">
-      <a href="<?php echo($ruta_raiz); ?>modulos/" class="brand-link">
-        <img src="<?php echo($ruta_raiz); ?>assets/img/i_ciafi.png" alt="S.English Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <span class="brand-text font-weight-light">S.English</span>
-      </a>
-      <a class="brand-link text-right pr-3" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-    </div>
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <!-- Sidebar Menu -->
-      <nav class="mt-1">
-        <ul class="nav nav-pills nav-sidebar flex-column nav-flat nav-child-indent" id="modulos" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- <li class="nav-item has-treeview user-panel mt-2 pb-2 mb-2">
-            <a href="#" class="nav-link">
-              <i class="nav-icon far fa-user-circle"></i>
-              <p>
-                <?php echo($usuario["usuario"]); ?>
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-              <i class=""></i>
-                <a href="#" class="nav-link">
-                  <i class="fas fa-user-edit nav-icon"></i>
-                  <p>Perfil</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" onclick="top.cerrarSesion();" class="nav-link">
-                  <i class="fas fa-sign-out-alt nav-icon"></i>
-                  <p>Cerrar Sesión</p>
-                </a>
-              </li>
-            </ul>
-          </li>-->
-        </ul>
-      </nav>
-      <!-- /.sidebar-menu -->
-    </div>
-    <!-- /.sidebar -->
-  </aside>
 
-  <div class="wrapper">
-    <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper vh-100">
-      <object type="text/html" id="object-contenido" name="object-contenido" data="" class="w-100 vh-100 border-0"></object>
-    </div>
-  </div>
+
+  <object type="text/html" id="object-contenido" name="object-contenido" data="" class="w-100 vh-100 border-0"></object>
   <!-- ./wrapper -->
 
   <!-- Modal de Cargando -->
@@ -115,7 +132,7 @@
           </div>
         </div>
         <div>
-          <img class="w-50" src="<?php echo($ruta_raiz); ?>assets/img/logo.svg" alt="">
+          <img class="w-50" src="<?php echo($ruta_raiz); ?>assets/img/i_ciafi.png" alt="">
         </div>
       </div>
     </div>

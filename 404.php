@@ -23,7 +23,7 @@
       echo $lib->metaTagsRequired();
       echo $lib->iconoPag();
     ?>  
-    <title>404 | LavaSecoExprex</title>
+    <title>404 | SEnglish</title>
     <?php  
       echo $lib->jquery();
       echo $lib->bootstrap();
